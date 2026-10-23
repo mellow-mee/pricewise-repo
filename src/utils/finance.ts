@@ -200,3 +200,89 @@ export function generateMonthlySpendingSeries(
 
   return series;
 }
+
+export interface YearlyMonthlySpending {
+  monthIndex: number; // 1 to 12
+  monthKey: string;   // e.g. "2026-01"
+  monthName: string;  // "January"
+  shortMonth: string; // "Jan"
+  totalSpendMinor: number;
+  receiptCount: number;
+  itemCount: number;
+}
+
+export interface YearlyExpenditureData {
+  year: number;
+  months: YearlyMonthlySpending[];
+  totalYearSpendMinor: number;
+  averageMonthlySpendMinor: number;
+  maxMonthSpendMinor: number;
+  activeMonthsCount: number;
+}
+
+/**
+ * Generate 12-month expenditure data (Jan-Dec) for a specific year.
+ */
+export function generateYearlyExpenditureSeries(
+  receipts: Receipt[],
+  year: number
+): YearlyExpenditureData {
+  const shortNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const fullNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  const yearReceipts = receipts.filter(
+    (r) => r.transactionDate && r.transactionDate.startsWith(String(year))
+  );
+
+  let totalYearSpendMinor = 0;
+  let maxMonthSpendMinor = 0;
+  let activeMonthsCount = 0;
+
+  const months: YearlyMonthlySpending[] = [];
+
+  for (let m = 1; m <= 12; m++) {
+    const monthKey = `${year}-${String(m).padStart(2, '0')}`;
+    const mReceipts = yearReceipts.filter(
+      (r) => r.transactionDate && r.transactionDate.startsWith(monthKey)
+    );
+
+    const totalSpendMinor = mReceipts.reduce((sum, r) => sum + (r.totalMinor || 0), 0);
+    const receiptCount = mReceipts.length;
+    const itemCount = mReceipts.reduce((sum, r) => sum + (r.items ? r.items.length : 1), 0);
+
+    if (totalSpendMinor > 0) {
+      activeMonthsCount++;
+    }
+    if (totalSpendMinor > maxMonthSpendMinor) {
+      maxMonthSpendMinor = totalSpendMinor;
+    }
+    totalYearSpendMinor += totalSpendMinor;
+
+    months.push({
+      monthIndex: m,
+      monthKey,
+      monthName: fullNames[m - 1],
+      shortMonth: shortNames[m - 1],
+      totalSpendMinor,
+      receiptCount,
+      itemCount,
+    });
+  }
+
+  const averageMonthlySpendMinor = activeMonthsCount > 0
+    ? Math.round(totalYearSpendMinor / activeMonthsCount)
+    : 0;
+
+  return {
+    year,
+    months,
+    totalYearSpendMinor,
+    averageMonthlySpendMinor,
+    maxMonthSpendMinor,
+    activeMonthsCount,
+  };
+}
+

@@ -12,6 +12,68 @@
   },
   "receipts": [
     {
+      "id": "rec-1792765263254",
+      "businessId": "biz_green_basket",
+      "merchantName": "Metro Packaging & Supplies LLP",
+      "invoiceNumber": "MPS-2026-904",
+      "transactionDate": "2026-10-23",
+      "currency": "INR",
+      "subtotalMinor": 1150000,
+      "taxMinor": 57500,
+      "discountMinor": 0,
+      "extraChargesMinor": 0,
+      "totalMinor": 1207500,
+      "paymentMethod": "Bank Transfer NEFT",
+      "status": "confirmed",
+      "extractionStatus": "completed",
+      "reviewStatus": "confirmed",
+      "createdAt": "2026-10-23T14:21:03.254Z",
+      "updatedAt": "2026-10-23T14:21:32.248Z",
+      "items": [
+        {
+          "id": "it-1",
+          "receiptId": "rec-1792765263254",
+          "originalDescription": "10x8x6 inch 3-Ply Corrugated Kraft Boxes",
+          "productName": "Packaging Boxes (3-Ply Kraft 10x8x6)",
+          "canonicalProductId": "prod-box-3ply",
+          "specification": "10x8x6 inch 3-ply brown corrugated kraft box",
+          "quantity": 500,
+          "unit": "box",
+          "unitPriceMinor": 1180,
+          "lineTotalMinor": 590000,
+          "category": "Packaging"
+        },
+        {
+          "id": "it-2",
+          "receiptId": "rec-1792765263254",
+          "originalDescription": "Medium Kraft Twisted Handle Bags 12x10",
+          "productName": "Kraft Paper Carry Bags (Medium)",
+          "canonicalProductId": "prod-kraft-bags",
+          "specification": "12x10 inch 120 GSM twisted handle kraft paper bag",
+          "quantity": 500,
+          "unit": "bag",
+          "unitPriceMinor": 700,
+          "lineTotalMinor": 350000,
+          "category": "Packaging"
+        },
+        {
+          "id": "it-3",
+          "receiptId": "rec-1792765263254",
+          "originalDescription": "Unbranded packing rolls (barcode unreadable)",
+          "productName": "Unidentified Packaging Roll (Unverified)",
+          "specification": "Unverified packing tape roll 50mm",
+          "quantity": 15,
+          "unit": "roll",
+          "unitPriceMinor": 14000,
+          "lineTotalMinor": 210000,
+          "category": "Packaging",
+          "reviewFlags": [
+            "unidentified_product"
+          ]
+        }
+      ]
+    },
+    {
       "id": "rec-1792760104391",
       "businessId": "biz_green_basket",
       "merchantName": "Metro Packaging & Supplies LLP",

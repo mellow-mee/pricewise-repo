@@ -15,6 +15,8 @@ import {
   rupeesToPaise,
 } from '../utils/finance.ts';
 import { CurrencyDisplay } from '../components/CurrencyDisplay.tsx';
+import { MonthlySpreadsheet } from '../components/MonthlySpreadsheet.tsx';
+import { YearlyExpenditureGraph } from '../components/YearlyExpenditureGraph.tsx';
 import {
   Search,
   Filter,
@@ -46,6 +48,10 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
   onReceiptDeleted,
   onNavigate,
 }) => {
+  // Shared Year & Month state driving both the yearly expenditure graph and the monthly spreadsheet
+  const [spreadsheetYear, setSpreadsheetYear] = useState<number>(2026);
+  const [spreadsheetMonth, setSpreadsheetMonth] = useState<number>(10); // October
+
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -170,15 +176,15 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
   };
 
   return (
-    <div className="space-y-6 pb-24 md:pb-12">
-      {/* 1. Header & Summary Bar */}
+    <div className="space-y-8 pb-24 md:pb-12">
+      {/* 1. Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#25382D]">
             Expense Ledger
           </h1>
           <p className="text-sm text-[#64756A] mt-0.5">
-            Verified purchasing records, itemized supplier invoices, and audit history.
+            Monthly spending spreadsheets, verified supplier invoices, and audit history.
           </p>
         </div>
 
@@ -191,15 +197,48 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
         </button>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-xl p-4">
-          <span className="text-xs text-[#64756A] block">Total In Filtered View</span>
-          <CurrencyDisplay
-            amountMinor={filteredTotalSpend}
-            className="text-2xl font-bold text-[#25382D] mt-0.5 block"
-          />
-          <span className="text-[11px] text-[#64756A] mt-1 block">
+      {/* 2. Year-wise Monthly Expenditure Graph */}
+      <section aria-label="Yearly Expenditure Graph">
+        <YearlyExpenditureGraph
+          receipts={receipts}
+          selectedYear={spreadsheetYear}
+          onYearChange={setSpreadsheetYear}
+          selectedMonth={spreadsheetMonth}
+          onMonthSelect={setSpreadsheetMonth}
+        />
+      </section>
+
+      {/* 3. Monthly Spending Spreadsheet Subsection */}
+      <section aria-label="Monthly Spending Spreadsheet">
+        <MonthlySpreadsheet
+          receipts={receipts}
+          selectedYear={spreadsheetYear}
+          onYearChange={setSpreadsheetYear}
+          selectedMonth={spreadsheetMonth}
+          onMonthChange={setSpreadsheetMonth}
+        />
+      </section>
+
+      {/* 4. Past Transactions Subsection */}
+      <section className="space-y-4 pt-4 border-t border-[#E2E7E2]" aria-label="Past Transactions">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h2 className="text-xl font-bold text-[#25382D]">Past Transactions</h2>
+            <p className="text-xs text-[#64756A] mt-0.5">
+              All uploaded receipts, invoices, and verified ledger entries.
+            </p>
+          </div>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-xl p-4">
+            <span className="text-xs text-[#64756A] block">Total In Filtered View</span>
+            <CurrencyDisplay
+              amountMinor={filteredTotalSpend}
+              className="text-2xl font-bold text-[#25382D] mt-0.5 block"
+            />
+            <span className="text-[11px] text-[#64756A] mt-1 block">
             Across {filteredReceipts.length} verified transactions
           </span>
         </div>
@@ -497,6 +536,7 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
           </div>
         </>
       )}
+      </section>
 
       {/* --- DETAIL MODAL --- */}
       {viewingReceipt && (

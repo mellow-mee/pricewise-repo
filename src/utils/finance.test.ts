@@ -11,6 +11,7 @@ import {
   rupeesToPaise,
   reconcileReceipt,
   calculateSpendingSummary,
+  generateYearlyExpenditureSeries,
 } from './finance.ts';
 import { Receipt, SavingsOpportunity } from '../types/index.ts';
 
@@ -116,3 +117,81 @@ test('calculateSpendingSummary handles transactions and potential differences', 
   assert.equal(summary.potentialDifferenceMinor, 125000); // ₹1,250
   assert.equal(summary.benchmarkSpendingMinor, 8460000 - 125000);
 });
+
+test('generateYearlyExpenditureSeries aggregates all 12 months for selected year', () => {
+  const receipts: Receipt[] = [
+    {
+      id: 'r1',
+      businessId: 'biz1',
+      merchantName: 'Supplier 1',
+      invoiceNumber: 'INV-1',
+      transactionDate: '2026-01-15',
+      currency: 'INR',
+      subtotalMinor: 100000,
+      taxMinor: 10000,
+      discountMinor: 0,
+      extraChargesMinor: 0,
+      totalMinor: 110000, // ₹1,100
+      status: 'confirmed',
+      extractionStatus: 'completed',
+      reviewStatus: 'confirmed',
+      items: [{ id: 'item-1', receiptId: 'r1', originalDescription: 'Item', productName: 'Item', specification: '', quantity: 1, unit: 'box', unitPriceMinor: 100000, lineTotalMinor: 100000, category: 'Packaging', confidence: 1, reviewFlags: [] }],
+      createdAt: '2026-01-15T00:00:00Z',
+      updatedAt: '2026-01-15T00:00:00Z',
+    },
+    {
+      id: 'r2',
+      businessId: 'biz1',
+      merchantName: 'Supplier 2',
+      invoiceNumber: 'INV-2',
+      transactionDate: '2026-10-20',
+      currency: 'INR',
+      subtotalMinor: 200000,
+      taxMinor: 20000,
+      discountMinor: 0,
+      extraChargesMinor: 0,
+      totalMinor: 220000, // ₹2,200
+      status: 'confirmed',
+      extractionStatus: 'completed',
+      reviewStatus: 'confirmed',
+      items: [],
+      createdAt: '2026-10-20T00:00:00Z',
+      updatedAt: '2026-10-20T00:00:00Z',
+    },
+    {
+      id: 'r3',
+      businessId: 'biz1',
+      merchantName: 'Old Supplier',
+      invoiceNumber: 'INV-3',
+      transactionDate: '2025-10-20', // Different year
+      currency: 'INR',
+      subtotalMinor: 999000,
+      taxMinor: 0,
+      discountMinor: 0,
+      extraChargesMinor: 0,
+      totalMinor: 999000,
+      status: 'confirmed',
+      extractionStatus: 'completed',
+      reviewStatus: 'confirmed',
+      items: [],
+      createdAt: '2025-10-20T00:00:00Z',
+      updatedAt: '2025-10-20T00:00:00Z',
+    },
+  ];
+
+  const yearly = generateYearlyExpenditureSeries(receipts, 2026);
+  assert.equal(yearly.year, 2026);
+  assert.equal(yearly.months.length, 12);
+  assert.equal(yearly.months[0].shortMonth, 'Jan');
+  assert.equal(yearly.months[0].totalSpendMinor, 110000);
+  assert.equal(yearly.months[0].receiptCount, 1);
+  assert.equal(yearly.months[1].shortMonth, 'Feb');
+  assert.equal(yearly.months[1].totalSpendMinor, 0);
+  assert.equal(yearly.months[9].shortMonth, 'Oct');
+  assert.equal(yearly.months[9].totalSpendMinor, 220000);
+  assert.equal(yearly.totalYearSpendMinor, 330000); // Excludes 2025 transaction
+  assert.equal(yearly.activeMonthsCount, 2);
+  assert.equal(yearly.averageMonthlySpendMinor, 165000);
+  assert.equal(yearly.maxMonthSpendMinor, 220000);
+});
+

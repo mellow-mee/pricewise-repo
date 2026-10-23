@@ -17,6 +17,10 @@ import {
   Sparkles,
   X,
   FileCheck,
+  PackageCheck,
+  RotateCcw,
+  AlertCircle,
+  Layers,
 } from 'lucide-react';
 import { Receipt, ReceiptLineItem, ProductCategory } from '../types/index.ts';
 import { createReceipt, extractReceiptImage } from '../services/api.ts';
@@ -29,15 +33,21 @@ interface ScanViewProps {
 }
 
 export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
+  // 3-step workflow state: 1 (Scan bill) | 2 (Check items) | 3 (Added to stock)
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [progressStep, setProgressStep] = useState<string>('');
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Review screen state
+  // Review screen state (Step 2)
   const [draftReceipt, setDraftReceipt] = useState<Receipt | null>(null);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+
+  // Success state (Step 3)
+  const [savedReceipt, setSavedReceipt] = useState<Receipt | null>(null);
 
   // File input refs
   const desktopFileInputRef = useRef<HTMLInputElement>(null);
@@ -57,7 +67,7 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
     // Validate type
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
     if (!validTypes.includes(file.type)) {
-      setErrorMessage('Unsupported file format. Please upload JPEG, PNG, or WEBP image.');
+      setErrorMessage('Unsupported file format. Please upload a JPEG, PNG, or WebP image.');
       return;
     }
 
@@ -76,13 +86,13 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
   // Run server extraction pipeline
   const runExtraction = async (base64: string, mimeType: string) => {
     setIsProcessing(true);
-    setProgressStep('Uploading document to secure memory...');
+    setProgressStep('Uploading bill to secure memory...');
     try {
-      await new Promise((r) => setTimeout(r, 600));
-      setProgressStep('Running Gemini vision extraction on merchant and line items...');
+      await new Promise((r) => setTimeout(r, 500));
+      setProgressStep('Extracting product names, quantities, and prices...');
 
       const extracted = await extractReceiptImage(base64, mimeType);
-      setProgressStep('Normalizing line items and unit pricing...');
+      setProgressStep('Validating line items and identifying products...');
       await new Promise((r) => setTimeout(r, 400));
 
       const newReceipt: Receipt = {
@@ -107,6 +117,8 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
           ...it,
           id: `item-${Date.now()}-${idx + 1}`,
           receiptId: `rec-${Date.now()}`,
+          // If confidence is lower or description is generic, mark as unidentified for review
+          isUnidentified: it.confidence < 0.92 || !it.canonicalProductId || it.productName.toLowerCase().includes('generic'),
         })),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -115,6 +127,7 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
       setDraftReceipt(newReceipt);
       setIsProcessing(false);
       setProgressStep('');
+      setCurrentStep(2); // Advance to Step 2: Check the items
     } catch (err: any) {
       console.error('Extraction error:', err);
       setErrorMessage('Receipt extraction failed. You can still input receipt details manually.');
@@ -141,7 +154,7 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
   };
 
   // Sample receipt generator for quick demonstration
-  const handleLoadSample = (sampleType: 'packaging' | 'cleaning') => {
+  const handleLoadSample = (sampleType: 'packaging' | 'cleaning' | 'unidentified') => {
     setErrorMessage(null);
     setIsProcessing(true);
     setProgressStep('Loading verified invoice sample...');
@@ -195,15 +208,15 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
             {
               id: 'it-3',
               receiptId: `rec-${Date.now()}`,
-              originalDescription: 'Reinforced Kraft Paper Packing Tape 50mm',
-              productName: 'Biodegradable Paper Tape (50mm x 50m)',
-              canonicalProductId: 'prod-paper-tape',
-              specification: 'Water-activated reinforced kraft packaging tape 50mm',
+              originalDescription: 'Unbranded packing rolls (barcode unreadable)',
+              productName: 'Unidentified Packaging Roll (Unverified)',
+              specification: 'Unverified packing tape roll 50mm',
               quantity: 15,
               unit: 'roll',
               unitPriceMinor: 14000,
               lineTotalMinor: 210000,
               category: 'Packaging',
+              reviewFlags: ['unidentified_product'],
             },
           ],
         };
@@ -247,10 +260,11 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
       }
       setIsProcessing(false);
       setProgressStep('');
-    }, 500);
+      setCurrentStep(2); // Move to Step 2
+    }, 450);
   };
 
-  // Review Screen Line Item Edit Handlers
+  // Step 2: Line Item Edit Handlers
   const handleUpdateItem = (index: number, field: keyof ReceiptLineItem, value: any) => {
     if (!draftReceipt) return;
     const items = [...draftReceipt.items];
@@ -259,6 +273,11 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
     // Auto-update lineTotal if qty or unitPrice changed
     if (field === 'quantity' || field === 'unitPriceMinor') {
       item.lineTotalMinor = Math.round(Number(item.quantity) * Number(item.unitPriceMinor));
+    }
+
+    // If user edited product name, clear unverified flag
+    if (field === 'productName' && item.reviewFlags) {
+      item.reviewFlags = item.reviewFlags.filter((f) => f !== 'unidentified_product');
     }
 
     items[index] = item;
@@ -283,7 +302,7 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
       specification: 'Standard specification',
       quantity: 1,
       unit: 'unit',
-      unitPriceMinor: 10000, // ₹100
+      unitPriceMinor: 10000,
       lineTotalMinor: 10000,
       category: 'Packaging',
     };
@@ -324,8 +343,8 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
       )
     : null;
 
-  // Confirm and Save to Ledger
-  const handleSaveToLedger = async () => {
+  // Step 3: Single Confirmation Button Handler ("Add to Stock")
+  const handleConfirmAddToStock = async () => {
     if (!draftReceipt) return;
     setIsSaving(true);
     setErrorMessage(null);
@@ -339,26 +358,115 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
       };
 
       const saved = await createReceipt(confirmedReceipt);
+      setSavedReceipt(saved);
       setIsSaving(false);
       onSaved(saved);
-      onNavigate('/ledger');
+      // Advance to Step 3: Explain stock update only after update succeeds!
+      setCurrentStep(3);
     } catch (err: any) {
-      console.error('Error saving to ledger:', err);
-      setErrorMessage(err.message || 'Failed to persist transaction to ledger.');
+      console.error('Error saving to stock:', err);
+      setErrorMessage(err.message || 'Failed to update stock. Please try again.');
       setIsSaving(false);
     }
   };
 
+  // Reset to Step 1
+  const handleScanAnother = () => {
+    setDraftReceipt(null);
+    setSelectedImage(null);
+    setSavedReceipt(null);
+    setErrorMessage(null);
+    setCurrentStep(1);
+  };
+
   return (
-    <div className="space-y-6 pb-24 md:pb-12 max-w-5xl mx-auto">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#25382D]">
-          Scan & Upload Receipts
-        </h1>
-        <p className="text-sm text-[#64756A] mt-0.5">
-          Extract line items, units, and purchasing prices with Gemini purchasing intelligence.
-        </p>
+    <div className="space-y-6 pb-24 md:pb-12 max-w-4xl mx-auto">
+      {/* 3-Step Wizard Navigation Header */}
+      <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-4 sm:p-5 shadow-xs">
+        <div className="flex items-center justify-between">
+          {/* Step 1 Pill */}
+          <div className="flex items-center gap-2">
+            <span
+              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                currentStep === 1
+                  ? 'bg-[#476C58] text-white ring-4 ring-[#DCE7DD]'
+                  : currentStep > 1
+                  ? 'bg-[#2E7D4F] text-white'
+                  : 'bg-[#F7F8F5] text-[#64756A] border border-[#E2E7E2]'
+              }`}
+            >
+              {currentStep > 1 ? <CheckCircle2 className="w-4 h-4" /> : '1'}
+            </span>
+            <div className="hidden sm:block">
+              <span className="text-[11px] uppercase tracking-wider text-[#64756A] font-semibold block">
+                Step 1
+              </span>
+              <span
+                className={`text-xs font-bold ${
+                  currentStep === 1 ? 'text-[#25382D]' : 'text-[#64756A]'
+                }`}
+              >
+                Scan your bill
+              </span>
+            </div>
+          </div>
+
+          <div className="w-8 sm:w-16 h-px bg-[#E2E7E2]" />
+
+          {/* Step 2 Pill */}
+          <div className="flex items-center gap-2">
+            <span
+              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                currentStep === 2
+                  ? 'bg-[#476C58] text-white ring-4 ring-[#DCE7DD]'
+                  : currentStep > 2
+                  ? 'bg-[#2E7D4F] text-white'
+                  : 'bg-[#F7F8F5] text-[#64756A] border border-[#E2E7E2]'
+              }`}
+            >
+              {currentStep > 2 ? <CheckCircle2 className="w-4 h-4" /> : '2'}
+            </span>
+            <div className="hidden sm:block">
+              <span className="text-[11px] uppercase tracking-wider text-[#64756A] font-semibold block">
+                Step 2
+              </span>
+              <span
+                className={`text-xs font-bold ${
+                  currentStep === 2 ? 'text-[#25382D]' : 'text-[#64756A]'
+                }`}
+              >
+                Check the items
+              </span>
+            </div>
+          </div>
+
+          <div className="w-8 sm:w-16 h-px bg-[#E2E7E2]" />
+
+          {/* Step 3 Pill */}
+          <div className="flex items-center gap-2">
+            <span
+              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                currentStep === 3
+                  ? 'bg-[#2E7D4F] text-white ring-4 ring-[#DCE7DD]'
+                  : 'bg-[#F7F8F5] text-[#64756A] border border-[#E2E7E2]'
+              }`}
+            >
+              {currentStep === 3 ? <PackageCheck className="w-4 h-4" /> : '3'}
+            </span>
+            <div className="hidden sm:block">
+              <span className="text-[11px] uppercase tracking-wider text-[#64756A] font-semibold block">
+                Step 3
+              </span>
+              <span
+                className={`text-xs font-bold ${
+                  currentStep === 3 ? 'text-[#2E7D4F]' : 'text-[#64756A]'
+                }`}
+              >
+                Add to stock
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {errorMessage && (
@@ -375,267 +483,32 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
 
       {/* --- EXTRACTION PROGRESS OVERLAY --- */}
       {isProcessing && (
-        <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-8 text-center space-y-4 shadow-sm animate-pulse">
+        <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-10 text-center space-y-4 shadow-sm animate-pulse">
           <div className="w-12 h-12 rounded-full bg-[#DCE7DD] text-[#476C58] flex items-center justify-center mx-auto">
             <RefreshCw className="w-6 h-6 animate-spin" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-base font-semibold text-[#25382D]">Extracting Purchasing Details</h3>
-            <p className="text-xs text-[#64756A]">{progressStep || 'Processing invoice...'}</p>
+            <h3 className="text-base font-semibold text-[#25382D]">Analyzing Bill & Extracting Items</h3>
+            <p className="text-xs text-[#64756A]">{progressStep || 'Processing document...'}</p>
           </div>
         </div>
       )}
 
-      {/* --- REVIEW & CONFIRMATION SCREEN (When draft is ready) --- */}
-      {draftReceipt && !isProcessing && (
-        <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-5 sm:p-7 shadow-xs space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#E2E7E2] pb-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <FileCheck className="w-5 h-5 text-[#2E7D4F]" />
-                <h2 className="text-lg font-bold text-[#25382D]">Review & Verify Extraction</h2>
-              </div>
-              <p className="text-xs text-[#64756A] mt-0.5">
-                Verify merchant details, line items, and unit prices before saving to your ledger.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  setDraftReceipt(null);
-                  setSelectedImage(null);
-                }}
-                className="px-3 py-1.5 rounded-lg border border-[#E2E7E2] text-xs font-medium text-[#64756A] hover:text-[#25382D] hover:bg-[#F7F8F5] cursor-pointer"
-              >
-                Discard / Retake
-              </button>
-              <button
-                onClick={handleSaveToLedger}
-                disabled={isSaving}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#476C58] text-white text-xs font-semibold hover:bg-[#3a5948] transition-colors cursor-pointer shadow-xs disabled:opacity-50"
-              >
-                <span>{isSaving ? 'Saving...' : 'Confirm & Save to Ledger'}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Receipt Header Fields */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <label className="text-xs font-medium text-[#64756A] block mb-1">
-                Supplier / Merchant
-              </label>
-              <input
-                type="text"
-                value={draftReceipt.merchantName}
-                onChange={(e) => setDraftReceipt({ ...draftReceipt, merchantName: e.target.value })}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-[#E2E7E2] focus:outline-hidden focus:border-[#476C58] bg-[#F7F8F5]"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-medium text-[#64756A] block mb-1">
-                Invoice / Bill Number
-              </label>
-              <input
-                type="text"
-                value={draftReceipt.invoiceNumber}
-                onChange={(e) => setDraftReceipt({ ...draftReceipt, invoiceNumber: e.target.value })}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-[#E2E7E2] focus:outline-hidden focus:border-[#476C58] bg-[#F7F8F5] font-mono"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-medium text-[#64756A] block mb-1">
-                Transaction Date
-              </label>
-              <input
-                type="date"
-                value={draftReceipt.transactionDate}
-                onChange={(e) => setDraftReceipt({ ...draftReceipt, transactionDate: e.target.value })}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-[#E2E7E2] focus:outline-hidden focus:border-[#476C58] bg-[#F7F8F5]"
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-medium text-[#64756A] block mb-1">
-                Payment Method
-              </label>
-              <input
-                type="text"
-                value={draftReceipt.paymentMethod || ''}
-                onChange={(e) => setDraftReceipt({ ...draftReceipt, paymentMethod: e.target.value })}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-[#E2E7E2] focus:outline-hidden focus:border-[#476C58] bg-[#F7F8F5]"
-              />
-            </div>
-          </div>
-
-          {/* Line Items Table */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#64756A]">
-                Extracted Line Items ({draftReceipt.items.length})
-              </span>
-              <button
-                onClick={handleAddItem}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[#E2E7E2] text-xs font-medium text-[#476C58] hover:bg-[#F7F8F5] cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Add Item</span>
-              </button>
-            </div>
-
-            <div className="border border-[#E2E7E2] rounded-xl overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-[#F7F8F5] border-b border-[#E2E7E2] text-[#64756A]">
-                    <th className="py-2.5 px-3 font-semibold">Description</th>
-                    <th className="py-2.5 px-3 font-semibold w-24">Qty</th>
-                    <th className="py-2.5 px-3 font-semibold w-20">Unit</th>
-                    <th className="py-2.5 px-3 font-semibold w-28">Unit Price (₹)</th>
-                    <th className="py-2.5 px-3 font-semibold w-32">Category</th>
-                    <th className="py-2.5 px-3 font-semibold text-right w-28">Total (₹)</th>
-                    <th className="py-2.5 px-2 w-10"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#E2E7E2]">
-                  {draftReceipt.items.map((item, idx) => (
-                    <tr key={item.id} className="hover:bg-[#FAFBF9]">
-                      <td className="py-2 px-3">
-                        <input
-                          type="text"
-                          value={item.productName}
-                          onChange={(e) => handleUpdateItem(idx, 'productName', e.target.value)}
-                          className="w-full px-2 py-1 rounded border border-[#E2E7E2] focus:border-[#476C58] text-xs"
-                        />
-                      </td>
-                      <td className="py-2 px-3">
-                        <input
-                          type="number"
-                          step="any"
-                          value={item.quantity}
-                          onChange={(e) => handleUpdateItem(idx, 'quantity', parseFloat(e.target.value) || 0)}
-                          className="w-full px-2 py-1 rounded border border-[#E2E7E2] focus:border-[#476C58] text-xs font-mono"
-                        />
-                      </td>
-                      <td className="py-2 px-3">
-                        <input
-                          type="text"
-                          value={item.unit}
-                          onChange={(e) => handleUpdateItem(idx, 'unit', e.target.value)}
-                          className="w-full px-2 py-1 rounded border border-[#E2E7E2] focus:border-[#476C58] text-xs"
-                        />
-                      </td>
-                      <td className="py-2 px-3">
-                        <input
-                          type="number"
-                          step="0.01"
-                          value={paiseToRupees(item.unitPriceMinor)}
-                          onChange={(e) =>
-                            handleUpdateItem(idx, 'unitPriceMinor', rupeesToPaise(parseFloat(e.target.value) || 0))
-                          }
-                          className="w-full px-2 py-1 rounded border border-[#E2E7E2] focus:border-[#476C58] text-xs font-mono"
-                        />
-                      </td>
-                      <td className="py-2 px-3">
-                        <select
-                          value={item.category}
-                          onChange={(e) => handleUpdateItem(idx, 'category', e.target.value as ProductCategory)}
-                          className="w-full px-2 py-1 rounded border border-[#E2E7E2] focus:border-[#476C58] text-xs"
-                        >
-                          <option value="Packaging">Packaging</option>
-                          <option value="Inventory & Food">Inventory & Food</option>
-                          <option value="Cleaning & Hygiene">Cleaning & Hygiene</option>
-                          <option value="Store Supplies">Store Supplies</option>
-                          <option value="Utilities & Facilities">Utilities & Facilities</option>
-                          <option value="Equipment">Equipment</option>
-                        </select>
-                      </td>
-                      <td className="py-2 px-3 text-right">
-                        <CurrencyDisplay
-                          amountMinor={item.lineTotalMinor}
-                          className="font-medium text-[#25382D]"
-                        />
-                      </td>
-                      <td className="py-2 px-2 text-center">
-                        <button
-                          onClick={() => handleRemoveItem(idx)}
-                          className="text-[#64756A] hover:text-[#B83E3E] p-1 cursor-pointer"
-                          aria-label="Remove item"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Totals & Reconciliation */}
-          <div className="flex flex-col sm:flex-row items-start justify-between gap-4 pt-4 border-t border-[#E2E7E2]">
-            {/* Reconciliation Warning or Confirmation */}
-            <div className="max-w-md">
-              {reconciliation && reconciliation.discrepancyMinor > 0 ? (
-                <div className="p-3 rounded-xl bg-[#FDF8F0] border border-[#F3E2CE] text-xs text-[#C0772C] flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-semibold block">Total Reconciled Discrepancy</span>
-                    Sum of line items ({formatINR(reconciliation.itemsSumMinor)}) does not match subtotal ({formatINR(draftReceipt.subtotalMinor)}). Check tax or individual line amounts.
-                  </div>
-                </div>
-              ) : (
-                <div className="p-3 rounded-xl bg-[#EDF7F1] border border-[#CDE8D8] text-xs text-[#2E7D4F] flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 shrink-0" />
-                  <span>All line items reconcile mathematically with receipt totals.</span>
-                </div>
-              )}
-            </div>
-
-            <div className="w-full sm:w-64 space-y-1.5 text-xs text-[#64756A]">
-              <div className="flex justify-between items-center">
-                <span>Subtotal:</span>
-                <CurrencyDisplay
-                  amountMinor={draftReceipt.subtotalMinor}
-                  className="font-medium text-[#25382D]"
-                />
-              </div>
-              <div className="flex justify-between items-center">
-                <span>GST / Tax:</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={paiseToRupees(draftReceipt.taxMinor)}
-                  onChange={(e) => {
-                    const newTax = rupeesToPaise(parseFloat(e.target.value) || 0);
-                    setDraftReceipt({
-                      ...draftReceipt,
-                      taxMinor: newTax,
-                      totalMinor: draftReceipt.subtotalMinor + newTax + draftReceipt.extraChargesMinor - draftReceipt.discountMinor,
-                    });
-                  }}
-                  className="w-24 px-2 py-0.5 text-right font-mono text-xs border border-[#E2E7E2] rounded"
-                />
-              </div>
-              <div className="flex justify-between items-center border-t border-[#E2E7E2] pt-2 text-sm font-bold text-[#25382D]">
-                <span>Total Amount:</span>
-                <CurrencyDisplay
-                  amountMinor={draftReceipt.totalMinor}
-                  className="text-[#25382D]"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* --- SCAN INTERFACES (When no draft is active) --- */}
-      {!draftReceipt && !isProcessing && (
+      {/* ============================================================== */}
+      {/* STEP 1: SCAN YOUR BILL                                         */}
+      {/* ============================================================== */}
+      {currentStep === 1 && !isProcessing && (
         <div className="space-y-6">
-          {/* A. MANDATORY DESKTOP DRAG-AND-DROP INTERFACE */}
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-[#25382D]">
+              Step 1 — Scan your bill
+            </h1>
+            <p className="text-sm text-[#64756A] mt-0.5">
+              Use the camera on mobile, or upload/drag and drop a bill on desktop.
+            </p>
+          </div>
+
+          {/* Desktop Drag and Drop Interface */}
           <div className="hidden md:block">
             <div
               onDragOver={handleDragOver}
@@ -665,10 +538,10 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
               </div>
 
               <h2 className="text-lg font-bold text-[#25382D]">
-                Drag and drop your receipt or invoice here
+                Drag and drop your bill or invoice here
               </h2>
               <p className="text-xs text-[#64756A] mt-1 mb-5 max-w-sm mx-auto">
-                Supports JPEG, PNG, and WebP images up to 20MB. Optical character recognition will extract merchant, items, and unit prices.
+                Upload JPEG, PNG, or WebP images up to 20MB. Optical character recognition will extract product names, quantities, and prices.
               </p>
 
               <button
@@ -685,7 +558,7 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
             </div>
           </div>
 
-          {/* B. MOBILE CAMERA-FIRST INTERFACE */}
+          {/* Mobile Camera Interface */}
           <div className="md:hidden space-y-4">
             <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-6 text-center space-y-5">
               <div className="w-16 h-16 rounded-full bg-[#DCE7DD] text-[#476C58] flex items-center justify-center mx-auto">
@@ -693,9 +566,9 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
               </div>
 
               <div>
-                <h2 className="text-lg font-bold text-[#25382D]">Take Receipt Photo</h2>
+                <h2 className="text-lg font-bold text-[#25382D]">Use Camera on Mobile</h2>
                 <p className="text-xs text-[#64756A] mt-1">
-                  Point camera at the invoice or receipt ensuring prices and items are well-lit.
+                  Point camera at the printed or digital bill ensuring product names and prices are clearly visible.
                 </p>
               </div>
 
@@ -746,16 +619,16 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
             </div>
           </div>
 
-          {/* Quick Demo Sample Invoices */}
+          {/* Quick Demo Test Bills */}
           <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-5 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-[#64756A]">
-                Quick Test Invoices (1-Click Demo)
+                Quick Test Bills (1-Click Demo)
               </span>
-              <span className="text-[11px] text-[#64756A]">Instant sample data</span>
+              <span className="text-[11px] text-[#64756A]">Instant sample scan</span>
             </div>
             <p className="text-xs text-[#64756A]">
-              Don't have a receipt file ready? Click below to test extraction and line-item review with realistic retail invoices:
+              Test the full workflow with realistic bills to see product extraction and review:
             </p>
 
             <div className="flex flex-wrap gap-3">
@@ -764,7 +637,7 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
                 className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[#E2E7E2] bg-[#F7F8F5] hover:bg-[#DCE7DD] text-xs font-medium text-[#25382D] transition-colors cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5 text-[#476C58]" />
-                <span>Load Packaging Boxes Invoice (₹12,075)</span>
+                <span>Packaging Bill (Includes 1 item to verify)</span>
               </button>
 
               <button
@@ -772,9 +645,307 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
                 className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[#E2E7E2] bg-[#F7F8F5] hover:bg-[#DCE7DD] text-xs font-medium text-[#25382D] transition-colors cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5 text-[#476C58]" />
-                <span>Load Eco Cleaner Invoice (₹5,355)</span>
+                <span>Eco Cleaner Supplies Bill</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* STEP 2: CHECK THE ITEMS                                        */}
+      {/* ============================================================== */}
+      {currentStep === 2 && draftReceipt && !isProcessing && (
+        <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-5 sm:p-7 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#E2E7E2] pb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <FileCheck className="w-5 h-5 text-[#476C58]" />
+                <h2 className="text-xl font-bold text-[#25382D]">Step 2 — Check the items</h2>
+              </div>
+              <p className="text-xs text-[#64756A] mt-0.5">
+                Check extracted product names, quantities, and prices. Items needing verification are highlighted below.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setCurrentStep(1)}
+              className="text-xs text-[#64756A] hover:text-[#25382D] flex items-center gap-1 self-start sm:self-auto cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Scan different bill</span>
+            </button>
+          </div>
+
+          {/* Supplier & Bill Header Details */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-[#F7F8F5] p-3.5 rounded-xl border border-[#E2E7E2] text-xs">
+            <div>
+              <span className="text-[#64756A] block text-[11px]">Supplier / Merchant</span>
+              <span className="font-bold text-[#25382D] text-sm mt-0.5 block truncate">
+                {draftReceipt.merchantName}
+              </span>
+            </div>
+            <div>
+              <span className="text-[#64756A] block text-[11px]">Bill / Invoice Number</span>
+              <span className="font-mono font-bold text-[#25382D] text-sm mt-0.5 block">
+                {draftReceipt.invoiceNumber}
+              </span>
+            </div>
+            <div>
+              <span className="text-[#64756A] block text-[11px]">Bill Date</span>
+              <span className="font-bold text-[#25382D] text-sm mt-0.5 block">
+                {draftReceipt.transactionDate}
+              </span>
+            </div>
+          </div>
+
+          {/* Readable List of Items with Highlight for Unidentified Items */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#64756A]">
+                Extracted Items ({draftReceipt.items.length})
+              </span>
+              <button
+                onClick={handleAddItem}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[#E2E7E2] text-xs font-medium text-[#476C58] hover:bg-[#F7F8F5] cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Item</span>
+              </button>
+            </div>
+
+            <div className="space-y-2.5">
+              {draftReceipt.items.map((item, idx) => {
+                const isUnidentified =
+                  (item.reviewFlags && item.reviewFlags.includes('unidentified_product')) ||
+                  item.productName.toLowerCase().includes('unidentified') ||
+                  item.productName.toLowerCase().includes('unverified');
+
+                return (
+                  <div
+                    key={item.id}
+                    className={`rounded-xl p-3.5 border transition-all ${
+                      isUnidentified
+                        ? 'border-[#C0772C] bg-[#FDF8F0] ring-2 ring-[#F3E2CE]'
+                        : 'border-[#E2E7E2] bg-[#FFFFFF] hover:border-[#476C58]'
+                    }`}
+                  >
+                    {/* Unidentified Alert Pill */}
+                    {isUnidentified && (
+                      <div className="flex items-center gap-1.5 text-xs text-[#C0772C] font-semibold mb-2">
+                        <AlertCircle className="w-4 h-4 shrink-0" />
+                        <span>Could not automatically verify this product — please check details:</span>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center text-xs">
+                      {/* Product Name */}
+                      <div className="md:col-span-5 space-y-1">
+                        <label className="text-[10px] uppercase tracking-wider text-[#64756A] font-semibold block">
+                          Product Name
+                        </label>
+                        <input
+                          type="text"
+                          value={item.productName}
+                          onChange={(e) => handleUpdateItem(idx, 'productName', e.target.value)}
+                          className={`w-full px-2.5 py-1.5 rounded-lg border text-xs focus:outline-hidden ${
+                            isUnidentified
+                              ? 'border-[#C0772C] bg-[#FFFFFF] focus:border-[#476C58]'
+                              : 'border-[#E2E7E2] bg-[#F7F8F5] focus:border-[#476C58]'
+                          }`}
+                        />
+                      </div>
+
+                      {/* Quantity & Unit */}
+                      <div className="md:col-span-3 grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                          <label className="text-[10px] uppercase tracking-wider text-[#64756A] font-semibold block">
+                            Qty
+                          </label>
+                          <input
+                            type="number"
+                            step="any"
+                            value={item.quantity}
+                            onChange={(e) => handleUpdateItem(idx, 'quantity', parseFloat(e.target.value) || 0)}
+                            className="w-full px-2 py-1.5 rounded-lg border border-[#E2E7E2] bg-[#F7F8F5] text-xs font-mono text-center focus:border-[#476C58]"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] uppercase tracking-wider text-[#64756A] font-semibold block">
+                            Unit
+                          </label>
+                          <input
+                            type="text"
+                            value={item.unit}
+                            onChange={(e) => handleUpdateItem(idx, 'unit', e.target.value)}
+                            className="w-full px-2 py-1.5 rounded-lg border border-[#E2E7E2] bg-[#F7F8F5] text-xs text-center focus:border-[#476C58]"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Unit Price */}
+                      <div className="md:col-span-2 space-y-1">
+                        <label className="text-[10px] uppercase tracking-wider text-[#64756A] font-semibold block">
+                          Unit Price (₹)
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={paiseToRupees(item.unitPriceMinor)}
+                          onChange={(e) =>
+                            handleUpdateItem(idx, 'unitPriceMinor', rupeesToPaise(parseFloat(e.target.value) || 0))
+                          }
+                          className="w-full px-2 py-1.5 rounded-lg border border-[#E2E7E2] bg-[#F7F8F5] text-xs font-mono text-right focus:border-[#476C58]"
+                        />
+                      </div>
+
+                      {/* Total and Delete */}
+                      <div className="md:col-span-2 flex items-center justify-between md:justify-end gap-3 pt-1 md:pt-0">
+                        <div className="text-right">
+                          <span className="text-[10px] uppercase tracking-wider text-[#64756A] block md:hidden">
+                            Total
+                          </span>
+                          <CurrencyDisplay
+                            amountMinor={item.lineTotalMinor}
+                            className="font-bold text-sm text-[#25382D]"
+                          />
+                        </div>
+
+                        <button
+                          onClick={() => handleRemoveItem(idx)}
+                          className="text-[#64756A] hover:text-[#B83E3E] p-1.5 rounded-lg hover:bg-[#FDF2F2] cursor-pointer"
+                          aria-label="Remove item"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Totals & Reconciliation */}
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-4 pt-4 border-t border-[#E2E7E2]">
+            <div className="max-w-md">
+              {reconciliation && reconciliation.discrepancyMinor > 0 ? (
+                <div className="p-3 rounded-xl bg-[#FDF8F0] border border-[#F3E2CE] text-xs text-[#C0772C] flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold block">Reconciliation Note</span>
+                    Sum of items ({formatINR(reconciliation.itemsSumMinor)}) differs from subtotal ({formatINR(draftReceipt.subtotalMinor)}).
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3 rounded-xl bg-[#EDF7F1] border border-[#CDE8D8] text-xs text-[#2E7D4F] flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>All line items and totals match mathematically.</span>
+                </div>
+              )}
+            </div>
+
+            <div className="w-full sm:w-64 space-y-1.5 text-xs text-[#64756A]">
+              <div className="flex justify-between items-center">
+                <span>Subtotal:</span>
+                <CurrencyDisplay amountMinor={draftReceipt.subtotalMinor} className="font-medium text-[#25382D]" />
+              </div>
+              <div className="flex justify-between items-center">
+                <span>GST / Tax:</span>
+                <CurrencyDisplay amountMinor={draftReceipt.taxMinor} className="font-medium text-[#25382D]" />
+              </div>
+              <div className="flex justify-between items-center border-t border-[#E2E7E2] pt-2 text-base font-bold text-[#25382D]">
+                <span>Total Amount:</span>
+                <CurrencyDisplay amountMinor={draftReceipt.totalMinor} className="text-[#25382D]" />
+              </div>
+            </div>
+          </div>
+
+          {/* STEP 3 ACTION: ONE CLEAR CONFIRMATION BUTTON */}
+          <div className="pt-4 border-t border-[#E2E7E2] flex flex-col sm:flex-row items-center justify-between gap-3">
+            <span className="text-xs text-[#64756A]">
+              Ready to update stock? Click the confirmation button below.
+            </span>
+
+            <button
+              onClick={handleConfirmAddToStock}
+              disabled={isSaving}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#476C58] text-white text-sm font-bold hover:bg-[#3a5948] transition-colors cursor-pointer shadow-md disabled:opacity-50"
+            >
+              {isSaving ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Updating Stock...</span>
+                </>
+              ) : (
+                <>
+                  <PackageCheck className="w-5 h-5" />
+                  <span>Add to Stock</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* STEP 3: STOCK UPDATED CONFIRMATION (ONLY AFTER UPDATE SUCCEEDS)*/}
+      {/* ============================================================== */}
+      {currentStep === 3 && savedReceipt && (
+        <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-6 sm:p-8 text-center space-y-6 shadow-xs animate-in fade-in zoom-in-95 duration-200">
+          {/* Success Check Icon */}
+          <div className="w-16 h-16 rounded-full bg-[#EDF7F1] text-[#2E7D4F] border border-[#CDE8D8] flex items-center justify-center mx-auto shadow-xs">
+            <PackageCheck className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-2 max-w-lg mx-auto">
+            <h2 className="text-2xl font-bold text-[#25382D]">Stock Updated Successfully!</h2>
+            <p className="text-sm text-[#64756A] leading-relaxed">
+              The items from <strong>{savedReceipt.merchantName}</strong> (Bill #{savedReceipt.invoiceNumber}) have been successfully added to your store inventory and recorded in your expense ledger.
+            </p>
+          </div>
+
+          {/* Added Stock Items Card */}
+          <div className="bg-[#F7F8F5] rounded-xl p-4 border border-[#E2E7E2] max-w-md mx-auto text-left space-y-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#64756A] block">
+              Items Added to Stock:
+            </span>
+            <ul className="text-xs text-[#25382D] divide-y divide-[#E2E7E2]">
+              {savedReceipt.items.map((it) => (
+                <li key={it.id} className="py-2 flex items-center justify-between gap-3">
+                  <div>
+                    <span className="font-semibold block">{it.productName}</span>
+                    <span className="text-[11px] text-[#64756A]">
+                      {it.quantity} {it.unit}s @ {formatINR(it.unitPriceMinor)}/{it.unit}
+                    </span>
+                  </div>
+                  <CurrencyDisplay amountMinor={it.lineTotalMinor} className="font-bold font-mono" />
+                </li>
+              ))}
+            </ul>
+            <div className="pt-2 border-t border-[#E2E7E2] flex items-center justify-between text-xs font-bold text-[#25382D]">
+              <span>Total Bill Amount Recorded:</span>
+              <CurrencyDisplay amountMinor={savedReceipt.totalMinor} />
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <button
+              onClick={handleScanAnother}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-[#E2E7E2] bg-[#FFFFFF] text-xs font-semibold text-[#25382D] hover:bg-[#F7F8F5] transition-colors cursor-pointer"
+            >
+              <RotateCcw className="w-4 h-4 text-[#476C58]" />
+              <span>Scan Another Bill</span>
+            </button>
+
+            <button
+              onClick={() => onNavigate('/ledger')}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#476C58] text-white text-xs font-semibold hover:bg-[#3a5948] transition-colors cursor-pointer shadow-xs"
+            >
+              <span>View in Ledger</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       )}
