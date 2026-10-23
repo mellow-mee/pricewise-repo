@@ -141,16 +141,16 @@ async function bootstrapServer() {
     }
   });
 
-  // 5. Grounded AI Purchasing Assistant
+  // 5. Grounded AI Purchasing Assistant (supports global and page-specific queries)
   app.post('/api/assistant/chat', async (req: Request, res: Response) => {
     try {
-      const { message, language } = req.body;
+      const { message, language, pageContext } = req.body;
       if (!message || typeof message !== 'string') {
         return res.status(400).json({ success: false, error: 'Valid prompt message is required' });
       }
 
       const lang = language === 'hi' ? 'hi' : 'en';
-      const answer = await answerPurchasingQuestion(message, lang);
+      const answer = await answerPurchasingQuestion(message, lang, pageContext);
       res.json({ success: true, data: answer });
     } catch (err: any) {
       console.error('Assistant error:', err);

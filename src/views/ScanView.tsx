@@ -386,28 +386,28 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
   return (
     <div className="space-y-6 pb-24 md:pb-12 max-w-4xl mx-auto">
       {/* 3-Step Wizard Navigation Header */}
-      <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-4 sm:p-5 shadow-xs">
+      <div className="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-4 sm:p-5 shadow-xs">
         <div className="flex items-center justify-between">
           {/* Step 1 Pill */}
           <div className="flex items-center gap-2">
             <span
               className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
                 currentStep === 1
-                  ? 'bg-[#476C58] text-white ring-4 ring-[#DCE7DD]'
+                  ? 'bg-[#1D4ED8] text-white ring-4 ring-[#DBEAFE]'
                   : currentStep > 1
-                  ? 'bg-[#2E7D4F] text-white'
-                  : 'bg-[#F7F8F5] text-[#64756A] border border-[#E2E7E2]'
+                  ? 'bg-[#1D4ED8] text-white'
+                  : 'bg-[#F8FAFC] text-[#475569] border border-[#E2E8F0]'
               }`}
             >
               {currentStep > 1 ? <CheckCircle2 className="w-4 h-4" /> : '1'}
             </span>
             <div className="hidden sm:block">
-              <span className="text-[11px] uppercase tracking-wider text-[#64756A] font-semibold block">
+              <span className="text-[11px] uppercase tracking-wider text-[#475569] font-semibold block">
                 {isHi ? 'Kadam 1' : 'Step 1'}
               </span>
               <span
                 className={`text-xs font-bold ${
-                  currentStep === 1 ? 'text-[#25382D]' : 'text-[#64756A]'
+                  currentStep === 1 ? 'text-[#0F172A]' : 'text-[#475569]'
                 }`}
               >
                 {isHi ? 'Bill scan karein' : 'Scan your bill'}
@@ -415,28 +415,28 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
             </div>
           </div>
 
-          <div className="w-8 sm:w-16 h-px bg-[#E2E7E2]" />
+          <div className="w-8 sm:w-16 h-px bg-[#E2E8F0]" />
 
           {/* Step 2 Pill */}
           <div className="flex items-center gap-2">
             <span
               className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
                 currentStep === 2
-                  ? 'bg-[#476C58] text-white ring-4 ring-[#DCE7DD]'
+                  ? 'bg-[#1D4ED8] text-white ring-4 ring-[#DBEAFE]'
                   : currentStep > 2
-                  ? 'bg-[#2E7D4F] text-white'
-                  : 'bg-[#F7F8F5] text-[#64756A] border border-[#E2E7E2]'
+                  ? 'bg-[#1D4ED8] text-white'
+                  : 'bg-[#F8FAFC] text-[#475569] border border-[#E2E8F0]'
               }`}
             >
               {currentStep > 2 ? <CheckCircle2 className="w-4 h-4" /> : '2'}
             </span>
             <div className="hidden sm:block">
-              <span className="text-[11px] uppercase tracking-wider text-[#64756A] font-semibold block">
+              <span className="text-[11px] uppercase tracking-wider text-[#475569] font-semibold block">
                 {isHi ? 'Kadam 2' : 'Step 2'}
               </span>
               <span
                 className={`text-xs font-bold ${
-                  currentStep === 2 ? 'text-[#25382D]' : 'text-[#64756A]'
+                  currentStep === 2 ? 'text-[#0F172A]' : 'text-[#475569]'
                 }`}
               >
                 {isHi ? 'Saman check karein' : 'Check the items'}
@@ -444,26 +444,26 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
             </div>
           </div>
 
-          <div className="w-8 sm:w-16 h-px bg-[#E2E7E2]" />
+          <div className="w-8 sm:w-16 h-px bg-[#E2E8F0]" />
 
           {/* Step 3 Pill */}
           <div className="flex items-center gap-2">
             <span
               className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
                 currentStep === 3
-                  ? 'bg-[#2E7D4F] text-white ring-4 ring-[#DCE7DD]'
-                  : 'bg-[#F7F8F5] text-[#64756A] border border-[#E2E7E2]'
+                  ? 'bg-[#1D4ED8] text-white ring-4 ring-[#DBEAFE]'
+                  : 'bg-[#F8FAFC] text-[#475569] border border-[#E2E8F0]'
               }`}
             >
               {currentStep === 3 ? <PackageCheck className="w-4 h-4" /> : '3'}
             </span>
             <div className="hidden sm:block">
-              <span className="text-[11px] uppercase tracking-wider text-[#64756A] font-semibold block">
+              <span className="text-[11px] uppercase tracking-wider text-[#475569] font-semibold block">
                 {isHi ? 'Kadam 3' : 'Step 3'}
               </span>
               <span
                 className={`text-xs font-bold ${
-                  currentStep === 3 ? 'text-[#2E7D4F]' : 'text-[#64756A]'
+                  currentStep === 3 ? 'text-[#1D4ED8]' : 'text-[#475569]'
                 }`}
               >
                 {isHi ? 'Stock me jodein' : 'Add to stock'}
@@ -474,12 +474,12 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
       </div>
 
       {errorMessage && (
-        <div className="p-4 rounded-xl bg-[#FDF2F2] border border-[#F5C2C2] text-xs text-[#B83E3E] flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-[#FEF2F2] border border-[#FECACA] text-xs text-[#DC2626] flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0" />
-            <span>{errorMessage}</span>
+            <span className="font-medium">{errorMessage}</span>
           </div>
-          <button onClick={() => setErrorMessage(null)} className="p-1 hover:bg-[#FBE8E8] rounded-md">
+          <button onClick={() => setErrorMessage(null)} className="p-1 hover:bg-[#FEE2E2] rounded-md cursor-pointer">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -487,15 +487,15 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
 
       {/* --- EXTRACTION PROGRESS OVERLAY --- */}
       {isProcessing && (
-        <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-10 text-center space-y-4 shadow-sm animate-pulse">
-          <div className="w-12 h-12 rounded-full bg-[#DCE7DD] text-[#476C58] flex items-center justify-center mx-auto">
+        <div className="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-10 text-center space-y-4 shadow-sm animate-pulse">
+          <div className="w-12 h-12 rounded-full bg-[#EFF6FF] text-[#1D4ED8] flex items-center justify-center mx-auto">
             <RefreshCw className="w-6 h-6 animate-spin" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-base font-semibold text-[#25382D]">
+            <h3 className="text-base font-semibold text-[#0F172A]">
               {isHi ? 'Bill jaanch aur saman extract ho raha hai...' : 'Analyzing Bill & Extracting Items'}
             </h3>
-            <p className="text-xs text-[#64756A]">{progressStep || (isHi ? 'Document process kiya ja raha hai...' : 'Processing document...')}</p>
+            <p className="text-xs text-[#475569]">{progressStep || (isHi ? 'Document process kiya ja raha hai...' : 'Processing document...')}</p>
           </div>
         </div>
       )}
@@ -506,10 +506,10 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
       {currentStep === 1 && !isProcessing && (
         <div className="space-y-6">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#25382D]">
+            <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">
               {isHi ? 'Kadam 1 — Apna bill scan karein' : 'Step 1 — Scan your bill'}
             </h1>
-            <p className="text-sm text-[#64756A] mt-0.5">
+            <p className="text-sm text-[#475569] mt-0.5">
               {isHi
                 ? 'Mobile camera se photo lein ya desktop par bill upload/drag-drop karein.'
                 : 'Use the camera on mobile, or upload/drag and drop a bill on desktop.'}
@@ -525,8 +525,8 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
               onClick={() => desktopFileInputRef.current?.click()}
               className={`border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all ${
                 isDragOver
-                  ? 'border-[#476C58] bg-[#EBF1EC] scale-[1.005]'
-                  : 'border-[#D4DDD5] bg-[#FFFFFF] hover:border-[#476C58] hover:bg-[#FAFBF9]'
+                  ? 'border-[#1D4ED8] bg-[#EFF6FF] scale-[1.005]'
+                  : 'border-[#CBD5E1] bg-[#FFFFFF] hover:border-[#1D4ED8] hover:bg-[#F8FAFC]'
               }`}
             >
               <input
@@ -541,14 +541,14 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
                 }}
               />
 
-              <div className="w-16 h-16 rounded-2xl bg-[#DCE7DD] text-[#476C58] flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 rounded-2xl bg-[#EFF6FF] text-[#1D4ED8] flex items-center justify-center mx-auto mb-4">
                 <UploadCloud className="w-8 h-8 stroke-[2]" />
               </div>
 
-              <h2 className="text-lg font-bold text-[#25382D]">
+              <h2 className="text-lg font-bold text-[#0F172A]">
                 {isHi ? 'Apna bill ya invoice yahan drag aur drop karein' : 'Drag and drop your bill or invoice here'}
               </h2>
-              <p className="text-xs text-[#64756A] mt-1 mb-5 max-w-sm mx-auto">
+              <p className="text-xs text-[#475569] mt-1 mb-5 max-w-sm mx-auto">
                 {isHi
                   ? 'JPEG, PNG, ya WebP image 20MB tak upload karein. Automatic OCR saman ke naam, quantity aur bhaav nikaal lega.'
                   : 'Upload JPEG, PNG, or WebP images up to 20MB. Optical character recognition will extract product names, quantities, and prices.'}
@@ -560,7 +560,7 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
                   e.stopPropagation();
                   desktopFileInputRef.current?.click();
                 }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#476C58] text-white text-xs font-semibold hover:bg-[#3a5948] transition-colors cursor-pointer shadow-xs"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1D4ED8] text-white text-xs font-semibold hover:bg-[#1E40AF] active:bg-[#172554] transition-colors cursor-pointer shadow-xs"
               >
                 <FileText className="w-4 h-4" />
                 <span>{isHi ? 'File chunein' : 'Browse files'}</span>
@@ -570,16 +570,16 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
 
           {/* Mobile Camera Interface */}
           <div className="md:hidden space-y-4">
-            <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-6 text-center space-y-5">
-              <div className="w-16 h-16 rounded-full bg-[#DCE7DD] text-[#476C58] flex items-center justify-center mx-auto">
+            <div className="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-6 text-center space-y-5">
+              <div className="w-16 h-16 rounded-full bg-[#EFF6FF] text-[#1D4ED8] flex items-center justify-center mx-auto">
                 <Camera className="w-8 h-8 stroke-[2]" />
               </div>
 
               <div>
-                <h2 className="text-lg font-bold text-[#25382D]">
+                <h2 className="text-lg font-bold text-[#0F172A]">
                   {isHi ? 'Mobile camera ka upyog karein' : 'Use Camera on Mobile'}
                 </h2>
-                <p className="text-xs text-[#64756A] mt-1">
+                <p className="text-xs text-[#475569] mt-1">
                   {isHi
                     ? 'Camera ko bill ke samne rakhein taaki saman ke naam aur bhaav saaf dikhein.'
                     : 'Point camera at the printed or digital bill ensuring product names and prices are clearly visible.'}
@@ -616,7 +616,7 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
               <div className="space-y-2">
                 <button
                   onClick={() => mobileCameraInputRef.current?.click()}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#476C58] text-white text-sm font-semibold hover:bg-[#3a5948] transition-colors shadow-xs cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#1D4ED8] text-white text-sm font-semibold hover:bg-[#1E40AF] active:bg-[#172554] transition-colors shadow-xs cursor-pointer"
                 >
                   <Camera className="w-4 h-4" />
                   <span>{isHi ? 'Camera kholein' : 'Open Camera'}</span>
@@ -624,9 +624,9 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
 
                 <button
                   onClick={() => mobileGalleryInputRef.current?.click()}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-[#E2E7E2] bg-[#FFFFFF] text-[#25382D] text-xs font-medium hover:bg-[#F7F8F5] transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] text-[#0F172A] text-xs font-semibold hover:bg-[#F8FAFC] transition-colors cursor-pointer"
                 >
-                  <UploadCloud className="w-4 h-4 text-[#64756A]" />
+                  <UploadCloud className="w-4 h-4 text-[#475569]" />
                   <span>{isHi ? 'Gallery ya Files se upload karein' : 'Choose from Gallery / Files'}</span>
                 </button>
               </div>
@@ -634,14 +634,14 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
           </div>
 
           {/* Quick Demo Test Bills */}
-          <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-5 shadow-xs space-y-3">
+          <div className="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-5 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#64756A]">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#475569]">
                 {isHi ? 'Quick Test Billein (1-Click Demo)' : 'Quick Test Bills (1-Click Demo)'}
               </span>
-              <span className="text-[11px] text-[#64756A]">{isHi ? 'Turant sample bill jaanch' : 'Instant sample scan'}</span>
+              <span className="text-[11px] text-[#475569]">{isHi ? 'Turant sample bill jaanch' : 'Instant sample scan'}</span>
             </div>
-            <p className="text-xs text-[#64756A]">
+            <p className="text-xs text-[#475569]">
               {isHi
                 ? 'Asli bills ke sath testing karein aur automatic line item extraction dekhein:'
                 : 'Test the full workflow with realistic bills to see product extraction and review:'}
@@ -650,17 +650,17 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => handleLoadSample('packaging')}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[#E2E7E2] bg-[#F7F8F5] hover:bg-[#DCE7DD] text-xs font-medium text-[#25382D] transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] hover:bg-[#EFF6FF] hover:border-[#BFDBFE] text-xs font-semibold text-[#0F172A] transition-colors cursor-pointer"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#476C58]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#1D4ED8]" />
                 <span>{isHi ? 'Packaging Bill (1 item verify karne ke liye)' : 'Packaging Bill (Includes 1 item to verify)'}</span>
               </button>
 
               <button
                 onClick={() => handleLoadSample('cleaning')}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[#E2E7E2] bg-[#F7F8F5] hover:bg-[#DCE7DD] text-xs font-medium text-[#25382D] transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] hover:bg-[#EFF6FF] hover:border-[#BFDBFE] text-xs font-semibold text-[#0F172A] transition-colors cursor-pointer"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#476C58]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#1D4ED8]" />
                 <span>{isHi ? 'Eco Cleaning Saman Bill' : 'Eco Cleaner Supplies Bill'}</span>
               </button>
             </div>
@@ -672,16 +672,18 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
       {/* STEP 2: CHECK THE ITEMS                                        */}
       {/* ============================================================== */}
       {currentStep === 2 && draftReceipt && !isProcessing && (
-        <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-5 sm:p-7 shadow-xs space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#E2E7E2] pb-4">
+        <div className="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-5 sm:p-7 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#E2E8F0] pb-4">
             <div>
               <div className="flex items-center gap-2">
-                <FileCheck className="w-5 h-5 text-[#476C58]" />
-                <h2 className="text-xl font-bold text-[#25382D]">
+                <div className="w-8 h-8 rounded-lg bg-[#EFF6FF] text-[#1D4ED8] flex items-center justify-center shrink-0">
+                  <FileCheck className="w-4 h-4" />
+                </div>
+                <h2 className="text-xl font-bold text-[#0F172A]">
                   {isHi ? 'Kadam 2 — Saman check karein' : 'Step 2 — Check the items'}
                 </h2>
               </div>
-              <p className="text-xs text-[#64756A] mt-0.5">
+              <p className="text-xs text-[#475569] mt-0.5">
                 {isHi
                   ? 'Extract kiye gaye saman ke naam, quantity aur bhaav verify karein. Jis item me jaanch ki zaroorat hai use highlight kiya gaya hai.'
                   : 'Check extracted product names, quantities, and prices. Items needing verification are highlighted below.'}
@@ -690,30 +692,30 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
 
             <button
               onClick={() => setCurrentStep(1)}
-              className="text-xs text-[#64756A] hover:text-[#25382D] flex items-center gap-1 self-start sm:self-auto cursor-pointer"
+              className="text-xs text-[#475569] hover:text-[#0F172A] flex items-center gap-1 self-start sm:self-auto cursor-pointer font-medium"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw className="w-3.5 h-3.5 text-[#1D4ED8]" />
               <span>{isHi ? 'Doosra bill scan karein' : 'Scan different bill'}</span>
             </button>
           </div>
 
           {/* Supplier & Bill Header Details */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-[#F7F8F5] p-3.5 rounded-xl border border-[#E2E7E2] text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-[#F8FAFC] p-3.5 rounded-xl border border-[#E2E8F0] text-xs">
             <div>
-              <span className="text-[#64756A] block text-[11px]">{isHi ? 'Vyapari / Supplier' : 'Supplier / Merchant'}</span>
-              <span className="font-bold text-[#25382D] text-sm mt-0.5 block truncate">
+              <span className="text-[#475569] block text-[11px]">{isHi ? 'Vyapari / Supplier' : 'Supplier / Merchant'}</span>
+              <span className="font-bold text-[#0F172A] text-sm mt-0.5 block truncate">
                 {draftReceipt.merchantName}
               </span>
             </div>
             <div>
-              <span className="text-[#64756A] block text-[11px]">{isHi ? 'Bill / Invoice Number' : 'Bill / Invoice Number'}</span>
-              <span className="font-mono font-bold text-[#25382D] text-sm mt-0.5 block">
+              <span className="text-[#475569] block text-[11px]">{isHi ? 'Bill / Invoice Number' : 'Bill / Invoice Number'}</span>
+              <span className="font-mono font-bold text-[#0F172A] text-sm mt-0.5 block">
                 {draftReceipt.invoiceNumber}
               </span>
             </div>
             <div>
-              <span className="text-[#64756A] block text-[11px]">{isHi ? 'Bill ki Tarikh' : 'Bill Date'}</span>
-              <span className="font-bold text-[#25382D] text-sm mt-0.5 block">
+              <span className="text-[#475569] block text-[11px]">{isHi ? 'Bill ki Tarikh' : 'Bill Date'}</span>
+              <span className="font-bold text-[#0F172A] text-sm mt-0.5 block">
                 {draftReceipt.transactionDate}
               </span>
             </div>
@@ -722,12 +724,12 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
           {/* Readable List of Items with Highlight for Unidentified Items */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#64756A]">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#475569]">
                 {isHi ? `Extract kiya gaya saman (${draftReceipt.items.length})` : `Extracted Items (${draftReceipt.items.length})`}
               </span>
               <button
                 onClick={handleAddItem}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[#E2E7E2] text-xs font-medium text-[#476C58] hover:bg-[#F7F8F5] cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[#E2E8F0] text-xs font-semibold text-[#1D4ED8] hover:bg-[#EFF6FF] cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{isHi ? 'Saman Jodein' : 'Add Item'}</span>
@@ -746,14 +748,14 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
                     key={item.id}
                     className={`rounded-xl p-3.5 border transition-all ${
                       isUnidentified
-                        ? 'border-[#C0772C] bg-[#FDF8F0] ring-2 ring-[#F3E2CE]'
-                        : 'border-[#E2E7E2] bg-[#FFFFFF] hover:border-[#476C58]'
+                        ? 'border-[#FED7AA] bg-[#FFF7ED] ring-2 ring-[#FED7AA]/50'
+                        : 'border-[#E2E8F0] bg-[#FFFFFF] hover:border-[#1D4ED8]/40'
                     }`}
                   >
-                    {/* Unidentified Alert Pill */}
+                    {/* Unidentified Alert Pill (Orange: warnings and items that need attention) */}
                     {isUnidentified && (
-                      <div className="flex items-center gap-1.5 text-xs text-[#C0772C] font-semibold mb-2">
-                        <AlertCircle className="w-4 h-4 shrink-0" />
+                      <div className="flex items-center gap-1.5 text-xs text-[#C2410C] font-semibold mb-2">
+                        <AlertCircle className="w-4 h-4 shrink-0 text-[#EA580C]" />
                         <span>
                           {isHi
                             ? 'Is product ko automatically verify nahi kiya ja saka — kripya details check karein:'
@@ -765,17 +767,17 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center text-xs">
                       {/* Product Name */}
                       <div className="md:col-span-5 space-y-1">
-                        <label className="text-[10px] uppercase tracking-wider text-[#64756A] font-semibold block">
+                        <label className="text-[10px] uppercase tracking-wider text-[#475569] font-semibold block">
                           {isHi ? 'Saman ka Naam' : 'Product Name'}
                         </label>
                         <input
                           type="text"
                           value={item.productName}
                           onChange={(e) => handleUpdateItem(idx, 'productName', e.target.value)}
-                          className={`w-full px-2.5 py-1.5 rounded-lg border text-xs focus:outline-hidden ${
+                          className={`w-full px-2.5 py-1.5 rounded-lg border text-xs font-medium focus:outline-hidden ${
                             isUnidentified
-                              ? 'border-[#C0772C] bg-[#FFFFFF] focus:border-[#476C58]'
-                              : 'border-[#E2E7E2] bg-[#F7F8F5] focus:border-[#476C58]'
+                              ? 'border-[#FDBA74] bg-[#FFFFFF] text-[#0F172A] focus:border-[#1D4ED8]'
+                              : 'border-[#E2E8F0] bg-[#F8FAFC] text-[#0F172A] focus:border-[#1D4ED8]'
                           }`}
                         />
                       </div>
@@ -783,7 +785,7 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
                       {/* Quantity & Unit */}
                       <div className="md:col-span-3 grid grid-cols-2 gap-2">
                         <div className="space-y-1">
-                          <label className="text-[10px] uppercase tracking-wider text-[#64756A] font-semibold block">
+                          <label className="text-[10px] uppercase tracking-wider text-[#475569] font-semibold block">
                             {isHi ? 'Quantity' : 'Qty'}
                           </label>
                           <input
@@ -791,25 +793,25 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
                             step="any"
                             value={item.quantity}
                             onChange={(e) => handleUpdateItem(idx, 'quantity', parseFloat(e.target.value) || 0)}
-                            className="w-full px-2 py-1.5 rounded-lg border border-[#E2E7E2] bg-[#F7F8F5] text-xs font-mono text-center focus:border-[#476C58]"
+                            className="w-full px-2 py-1.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] text-xs font-mono font-medium text-[#0F172A] text-center focus:border-[#1D4ED8]"
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-[10px] uppercase tracking-wider text-[#64756A] font-semibold block">
+                          <label className="text-[10px] uppercase tracking-wider text-[#475569] font-semibold block">
                             {isHi ? 'Unit' : 'Unit'}
                           </label>
                           <input
                             type="text"
                             value={item.unit}
                             onChange={(e) => handleUpdateItem(idx, 'unit', e.target.value)}
-                            className="w-full px-2 py-1.5 rounded-lg border border-[#E2E7E2] bg-[#F7F8F5] text-xs text-center focus:border-[#476C58]"
+                            className="w-full px-2 py-1.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] text-xs font-medium text-[#0F172A] text-center focus:border-[#1D4ED8]"
                           />
                         </div>
                       </div>
 
                       {/* Unit Price */}
                       <div className="md:col-span-2 space-y-1">
-                        <label className="text-[10px] uppercase tracking-wider text-[#64756A] font-semibold block">
+                        <label className="text-[10px] uppercase tracking-wider text-[#475569] font-semibold block">
                           {isHi ? 'Unit Bhaav (₹)' : 'Unit Price (₹)'}
                         </label>
                         <input
@@ -819,25 +821,26 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
                           onChange={(e) =>
                             handleUpdateItem(idx, 'unitPriceMinor', rupeesToPaise(parseFloat(e.target.value) || 0))
                           }
-                          className="w-full px-2 py-1.5 rounded-lg border border-[#E2E7E2] bg-[#F7F8F5] text-xs font-mono text-right focus:border-[#476C58]"
+                          className="w-full px-2 py-1.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] text-xs font-mono font-medium text-[#0F172A] text-right focus:border-[#1D4ED8]"
                         />
                       </div>
 
                       {/* Total and Delete */}
                       <div className="md:col-span-2 flex items-center justify-between md:justify-end gap-3 pt-1 md:pt-0">
                         <div className="text-right">
-                          <span className="text-[10px] uppercase tracking-wider text-[#64756A] block md:hidden">
+                          <span className="text-[10px] uppercase tracking-wider text-[#475569] block md:hidden">
                             {isHi ? 'Kul Rakam' : 'Total'}
                           </span>
                           <CurrencyDisplay
                             amountMinor={item.lineTotalMinor}
-                            className="font-bold text-sm text-[#25382D]"
+                            className="font-bold text-sm text-[#0F172A]"
                           />
                         </div>
 
+                        {/* Red: Errors and genuinely urgent / destructive actions only */}
                         <button
                           onClick={() => handleRemoveItem(idx)}
-                          className="text-[#64756A] hover:text-[#B83E3E] p-1.5 rounded-lg hover:bg-[#FDF2F2] cursor-pointer"
+                          className="text-[#475569] hover:text-[#DC2626] p-1.5 rounded-lg hover:bg-[#FEF2F2] cursor-pointer transition-colors"
                           aria-label="Remove item"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -851,11 +854,11 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
           </div>
 
           {/* Totals & Reconciliation */}
-          <div className="flex flex-col sm:flex-row items-start justify-between gap-4 pt-4 border-t border-[#E2E7E2]">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-4 pt-4 border-t border-[#E2E8F0]">
             <div className="max-w-md">
               {reconciliation && reconciliation.discrepancyMinor > 0 ? (
-                <div className="p-3 rounded-xl bg-[#FDF8F0] border border-[#F3E2CE] text-xs text-[#C0772C] flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                <div className="p-3 rounded-xl bg-[#FFF7ED] border border-[#FED7AA] text-xs text-[#C2410C] flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-[#EA580C]" />
                   <div>
                     <span className="font-semibold block">{isHi ? 'Reconciliation Suchna' : 'Reconciliation Note'}</span>
                     {isHi
@@ -864,9 +867,9 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
                   </div>
                 </div>
               ) : (
-                <div className="p-3 rounded-xl bg-[#EDF7F1] border border-[#CDE8D8] text-xs text-[#2E7D4F] flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 shrink-0" />
-                  <span>
+                <div className="p-3 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] text-xs text-[#1D4ED8] flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-[#1D4ED8]" />
+                  <span className="font-medium">
                     {isHi
                       ? 'Sabhi line items aur kul rakam ganitiya roop se match karte hain.'
                       : 'All line items and totals match mathematically.'}
@@ -875,25 +878,25 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
               )}
             </div>
 
-            <div className="w-full sm:w-64 space-y-1.5 text-xs text-[#64756A]">
+            <div className="w-full sm:w-64 space-y-1.5 text-xs text-[#475569]">
               <div className="flex justify-between items-center">
                 <span>{isHi ? 'Mool Rakam (Subtotal):' : 'Subtotal:'}</span>
-                <CurrencyDisplay amountMinor={draftReceipt.subtotalMinor} className="font-medium text-[#25382D]" />
+                <CurrencyDisplay amountMinor={draftReceipt.subtotalMinor} className="font-semibold text-[#0F172A]" />
               </div>
               <div className="flex justify-between items-center">
                 <span>{isHi ? 'GST / Tax:' : 'GST / Tax:'}</span>
-                <CurrencyDisplay amountMinor={draftReceipt.taxMinor} className="font-medium text-[#25382D]" />
+                <CurrencyDisplay amountMinor={draftReceipt.taxMinor} className="font-semibold text-[#0F172A]" />
               </div>
-              <div className="flex justify-between items-center border-t border-[#E2E7E2] pt-2 text-base font-bold text-[#25382D]">
+              <div className="flex justify-between items-center border-t border-[#E2E8F0] pt-2 text-base font-bold text-[#0F172A]">
                 <span>{isHi ? 'Kul Rakam (Total):' : 'Total Amount:'}</span>
-                <CurrencyDisplay amountMinor={draftReceipt.totalMinor} className="text-[#25382D]" />
+                <CurrencyDisplay amountMinor={draftReceipt.totalMinor} className="text-[#0F172A]" />
               </div>
             </div>
           </div>
 
-          {/* STEP 3 ACTION: ONE CLEAR CONFIRMATION BUTTON */}
-          <div className="pt-4 border-t border-[#E2E7E2] flex flex-col sm:flex-row items-center justify-between gap-3">
-            <span className="text-xs text-[#64756A]">
+          {/* STEP 3 ACTION: ONE CLEAR CONFIRMATION BUTTON (Primary Blue) */}
+          <div className="pt-4 border-t border-[#E2E8F0] flex flex-col sm:flex-row items-center justify-between gap-3">
+            <span className="text-xs text-[#475569]">
               {isHi
                 ? 'Stock update karne ke liye taiyar hain? Neeche diye gaye button par click karein.'
                 : 'Ready to update stock? Click the confirmation button below.'}
@@ -902,7 +905,7 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
             <button
               onClick={handleConfirmAddToStock}
               disabled={isSaving}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#476C58] text-white text-sm font-bold hover:bg-[#3a5948] transition-colors cursor-pointer shadow-md disabled:opacity-50"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#1D4ED8] text-white text-sm font-bold hover:bg-[#1E40AF] active:bg-[#172554] transition-colors cursor-pointer shadow-md disabled:opacity-50"
             >
               {isSaving ? (
                 <>
@@ -924,17 +927,17 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
       {/* STEP 3: STOCK UPDATED CONFIRMATION (ONLY AFTER UPDATE SUCCEEDS)*/}
       {/* ============================================================== */}
       {currentStep === 3 && savedReceipt && (
-        <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-6 sm:p-8 text-center space-y-6 shadow-xs animate-in fade-in zoom-in-95 duration-200">
-          {/* Success Check Icon */}
-          <div className="w-16 h-16 rounded-full bg-[#EDF7F1] text-[#2E7D4F] border border-[#CDE8D8] flex items-center justify-center mx-auto shadow-xs">
+        <div className="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-6 sm:p-8 text-center space-y-6 shadow-xs animate-in fade-in zoom-in-95 duration-200">
+          {/* Success Check Icon (Light blue container, primary blue icon) */}
+          <div className="w-16 h-16 rounded-full bg-[#EFF6FF] text-[#1D4ED8] border border-[#BFDBFE] flex items-center justify-center mx-auto shadow-xs">
             <PackageCheck className="w-8 h-8" />
           </div>
 
           <div className="space-y-2 max-w-lg mx-auto">
-            <h2 className="text-2xl font-bold text-[#25382D]">
+            <h2 className="text-2xl font-bold text-[#0F172A]">
               {isHi ? 'Stock Safaltapoorvak Update Ho Gaya!' : 'Stock Updated Successfully!'}
             </h2>
-            <p className="text-sm text-[#64756A] leading-relaxed">
+            <p className="text-sm text-[#334155] leading-relaxed">
               {isHi ? (
                 <>
                   <strong>{savedReceipt.merchantName}</strong> (Bill #{savedReceipt.invoiceNumber}) ke sabhi items aapke dukan stock me jud gaye hain aur kharcha khata me darj ho chuke hain.
@@ -948,24 +951,24 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
           </div>
 
           {/* Added Stock Items Card */}
-          <div className="bg-[#F7F8F5] rounded-xl p-4 border border-[#E2E7E2] max-w-md mx-auto text-left space-y-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#64756A] block">
+          <div className="bg-[#F8FAFC] rounded-xl p-4 border border-[#E2E8F0] max-w-md mx-auto text-left space-y-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#475569] block">
               {isHi ? 'Stock Me Joda Gaya Saman:' : 'Items Added to Stock:'}
             </span>
-            <ul className="text-xs text-[#25382D] divide-y divide-[#E2E7E2]">
+            <ul className="text-xs text-[#0F172A] divide-y divide-[#E2E8F0]">
               {savedReceipt.items.map((it) => (
                 <li key={it.id} className="py-2 flex items-center justify-between gap-3">
                   <div>
-                    <span className="font-semibold block">{it.productName}</span>
-                    <span className="text-[11px] text-[#64756A]">
+                    <span className="font-semibold block text-[#0F172A]">{it.productName}</span>
+                    <span className="text-[11px] text-[#475569]">
                       {it.quantity} {it.unit}s @ {formatINR(it.unitPriceMinor)}/{it.unit}
                     </span>
                   </div>
-                  <CurrencyDisplay amountMinor={it.lineTotalMinor} className="font-bold font-mono" />
+                  <CurrencyDisplay amountMinor={it.lineTotalMinor} className="font-bold font-mono text-[#0F172A]" />
                 </li>
               ))}
             </ul>
-            <div className="pt-2 border-t border-[#E2E7E2] flex items-center justify-between text-xs font-bold text-[#25382D]">
+            <div className="pt-2 border-t border-[#E2E8F0] flex items-center justify-between text-xs font-bold text-[#0F172A]">
               <span>{isHi ? 'Darj Ki Gayi Kul Bill Rakam:' : 'Total Bill Amount Recorded:'}</span>
               <CurrencyDisplay amountMinor={savedReceipt.totalMinor} />
             </div>
@@ -975,15 +978,15 @@ export const ScanView: React.FC<ScanViewProps> = ({ onSaved, onNavigate }) => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <button
               onClick={handleScanAnother}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-[#E2E7E2] bg-[#FFFFFF] text-xs font-semibold text-[#25382D] hover:bg-[#F7F8F5] transition-colors cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] text-xs font-semibold text-[#0F172A] hover:bg-[#F8FAFC] transition-colors cursor-pointer"
             >
-              <RotateCcw className="w-4 h-4 text-[#476C58]" />
+              <RotateCcw className="w-4 h-4 text-[#1D4ED8]" />
               <span>{isHi ? 'Naya Bill Scan Karein' : 'Scan Another Bill'}</span>
             </button>
 
             <button
               onClick={() => onNavigate('/ledger')}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#476C58] text-white text-xs font-semibold hover:bg-[#3a5948] transition-colors cursor-pointer shadow-xs"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#1D4ED8] text-white text-xs font-semibold hover:bg-[#1E40AF] active:bg-[#172554] transition-colors cursor-pointer shadow-xs"
             >
               <span>{isHi ? 'Khata Me Dekhein' : 'View in Ledger'}</span>
               <ArrowRight className="w-4 h-4" />

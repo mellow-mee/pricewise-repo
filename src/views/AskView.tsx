@@ -141,16 +141,16 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
   return (
     <div className="flex flex-col h-[calc(100vh-10rem)] max-w-4xl mx-auto pb-16 md:pb-6">
       {/* 1. Header */}
-      <div className="flex items-center justify-between border-b border-[#E2E7E2] pb-3 mb-3">
+      <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-3 mb-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-[#DCE7DD] text-[#476C58] flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl bg-[#EFF6FF] text-[#1D4ED8] flex items-center justify-center">
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-[#25382D]">
+            <h1 className="text-lg font-bold text-[#0F172A]">
               {isHi ? 'Khareed Vyapar Sahayak (AI)' : 'Purchasing AI Assistant'}
             </h1>
-            <p className="text-xs text-[#64756A]">
+            <p className="text-xs text-[#475569]">
               {isHi
                 ? `${business?.name || 'Green Basket Stores'} ke ${receipts.length} satyapit billon par aadharit`
                 : `Grounded in ${receipts.length} verified invoices for ${business?.name || 'Green Basket Stores'}`}
@@ -158,9 +158,9 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
           </div>
         </div>
 
-        <div className="hidden sm:flex items-center gap-1.5 text-xs text-[#2E7D4F] bg-[#EDF7F1] px-2.5 py-1 rounded-lg border border-[#CDE8D8]">
+        <div className="hidden sm:flex items-center gap-1.5 text-xs text-[#1D4ED8] bg-[#EFF6FF] px-2.5 py-1 rounded-lg border border-[#BFDBFE]">
           <ShieldCheck className="w-3.5 h-3.5" />
-          <span>{isHi ? 'Surakshit Vyapar Data' : 'Private Business Tenancy'}</span>
+          <span className="font-medium">{isHi ? 'Surakshit Vyapar Data' : 'Private Business Tenancy'}</span>
         </div>
       </div>
 
@@ -176,8 +176,8 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-semibold ${
                   isUser
-                    ? 'bg-[#25382D] text-white'
-                    : 'bg-[#DCE7DD] text-[#476C58]'
+                    ? 'bg-[#0F172A] text-white'
+                    : 'bg-[#EFF6FF] text-[#1D4ED8]'
                 }`}
               >
                 {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
@@ -186,8 +186,8 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
               <div
                 className={`max-w-[85%] rounded-2xl p-4 text-xs space-y-3 leading-relaxed ${
                   isUser
-                    ? 'bg-[#476C58] text-white'
-                    : 'bg-[#FFFFFF] border border-[#E2E7E2] text-[#25382D] shadow-xs'
+                    ? 'bg-[#1D4ED8] text-white shadow-xs'
+                    : 'bg-[#FFFFFF] border border-[#E2E8F0] text-[#0F172A] shadow-xs'
                 }`}
               >
                 {/* Message Body */}
@@ -199,11 +199,11 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
 
                 {/* Grounded Metrics Badges */}
                 {msg.groundedMetrics && msg.groundedMetrics.length > 0 && (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2 border-t border-[#E2E7E2]">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2 border-t border-[#E2E8F0]">
                     {msg.groundedMetrics.map((met, i) => (
-                      <div key={i} className="p-2 rounded-lg bg-[#F7F8F5] border border-[#E2E7E2]">
-                        <span className="text-[10px] text-[#64756A] block">{met.label}</span>
-                        <span className="font-mono font-bold text-xs text-[#25382D] block mt-0.5">
+                      <div key={i} className="p-2 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0]">
+                        <span className="text-[10px] text-[#475569] font-medium block">{met.label}</span>
+                        <span className="font-mono font-bold text-xs text-[#0F172A] block mt-0.5">
                           {met.value}
                         </span>
                       </div>
@@ -213,15 +213,15 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
 
                 {/* Referenced Transactions */}
                 {msg.referencedReceiptIds && msg.referencedReceiptIds.length > 0 && (
-                  <div className="pt-2 border-t border-[#E2E7E2] flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] text-[#64756A] font-semibold">
+                  <div className="pt-2 border-t border-[#E2E8F0] flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] text-[#475569] font-semibold">
                       {isHi ? 'Jude hue bill:' : 'Referenced Invoices:'}
                     </span>
                     {msg.referencedReceiptIds.map((id) => (
                       <button
                         key={id}
                         onClick={() => onNavigate('/ledger')}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#F7F8F5] border border-[#E2E7E2] text-[10px] font-mono text-[#476C58] hover:bg-[#DCE7DD] cursor-pointer"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#F8FAFC] border border-[#E2E8F0] text-[10px] font-mono text-[#1D4ED8] hover:bg-[#EFF6FF] cursor-pointer"
                       >
                         <ReceiptIcon className="w-3 h-3" />
                         <span>{id}</span>
@@ -232,8 +232,8 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
 
                 {/* Suggested Follow-ups */}
                 {msg.suggestedFollowUps && msg.suggestedFollowUps.length > 0 && (
-                  <div className="pt-2 border-t border-[#E2E7E2] space-y-1.5">
-                    <span className="text-[10px] text-[#64756A] font-semibold block">
+                  <div className="pt-2 border-t border-[#E2E8F0] space-y-1.5">
+                    <span className="text-[10px] text-[#475569] font-semibold block">
                       {isHi ? 'Aage pooch sakte hain:' : 'Suggested follow-ups:'}
                     </span>
                     <div className="flex flex-wrap gap-1.5">
@@ -241,7 +241,7 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
                         <button
                           key={idx}
                           onClick={() => handleSendMessage(fu)}
-                          className="px-2.5 py-1 rounded-lg bg-[#F7F8F5] border border-[#E2E7E2] text-[11px] text-[#25382D] hover:bg-[#DCE7DD] hover:text-[#25382D] transition-colors cursor-pointer text-left"
+                          className="px-2.5 py-1 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] text-[11px] font-medium text-[#0F172A] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] hover:border-[#BFDBFE] transition-colors cursor-pointer text-left"
                         >
                           {fu}
                         </button>
@@ -256,11 +256,11 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
 
         {isLoading && (
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#DCE7DD] text-[#476C58] flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-full bg-[#EFF6FF] text-[#1D4ED8] flex items-center justify-center shrink-0">
               <Bot className="w-4 h-4" />
             </div>
-            <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-4 text-xs text-[#64756A] shadow-xs flex items-center gap-2">
-              <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#476C58]" />
+            <div className="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-4 text-xs text-[#475569] shadow-xs flex items-center gap-2">
+              <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#1D4ED8]" />
               <span>
                 {isHi
                   ? 'Kharchon ka khata aur market benchmarks jaanch rahe hain...'
@@ -276,7 +276,7 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
       {/* 3. Starter Questions Chips (if conversation is fresh) */}
       {messages.length <= 2 && (
         <div className="py-2 space-y-1.5">
-          <span className="text-[11px] text-[#64756A] font-medium block">
+          <span className="text-[11px] text-[#475569] font-semibold block">
             {isHi ? 'Sujhav diye gaye prashna:' : 'Suggested starter queries:'}
           </span>
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
@@ -284,7 +284,7 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
               <button
                 key={idx}
                 onClick={() => handleSendMessage(q)}
-                className="px-3 py-1.5 rounded-xl border border-[#E2E7E2] bg-[#FFFFFF] text-xs font-medium text-[#25382D] hover:bg-[#DCE7DD] whitespace-nowrap transition-colors cursor-pointer shrink-0"
+                className="px-3 py-1.5 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] text-xs font-semibold text-[#0F172A] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] hover:border-[#BFDBFE] whitespace-nowrap transition-colors cursor-pointer shrink-0"
               >
                 {q}
               </button>
@@ -312,14 +312,14 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             disabled={isLoading}
-            className="w-full px-4 py-3 text-xs rounded-xl border border-[#E2E7E2] bg-[#FFFFFF] focus:outline-hidden focus:border-[#476C58] shadow-xs"
+            className="w-full px-4 py-3 text-xs rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] text-[#0F172A] placeholder:text-[#64748B] focus:outline-hidden focus:border-[#1D4ED8] shadow-xs"
           />
         </div>
 
         <button
           type="submit"
           disabled={!inputValue.trim() || isLoading}
-          className="p-3 rounded-xl bg-[#476C58] text-white hover:bg-[#3a5948] transition-colors cursor-pointer disabled:opacity-50 shrink-0 shadow-xs"
+          className="p-3 rounded-xl bg-[#1D4ED8] text-white hover:bg-[#1E40AF] active:bg-[#172554] transition-colors cursor-pointer disabled:opacity-50 shrink-0 shadow-xs"
           aria-label="Send query to assistant"
         >
           <Send className="w-4 h-4" />

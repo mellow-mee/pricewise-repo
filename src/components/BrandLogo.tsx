@@ -31,7 +31,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
       <div
-        className={`${iconSizes[size]} rounded-lg bg-[#476C58] flex items-center justify-center text-white shadow-xs shrink-0`}
+        className={`${iconSizes[size]} rounded-lg bg-[#1D4ED8] flex items-center justify-center text-white shadow-xs shrink-0`}
         aria-hidden="true"
       >
         <svg
@@ -53,7 +53,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       </div>
 
       {showWordmark && (
-        <span className={`font-semibold tracking-tight text-[#25382D] ${textSizes[size]}`}>
+        <span className={`font-semibold tracking-tight text-[#0F172A] ${textSizes[size]}`}>
           Pricewise
         </span>
       )}

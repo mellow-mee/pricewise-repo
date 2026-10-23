@@ -241,17 +241,19 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
   };
 
   return (
-    <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
+    <div className="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
       {/* 1. Header with Month & Year Switcher Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E7E2] pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E2E8F0] pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <FileSpreadsheet className="w-5 h-5 text-[#476C58]" />
-            <h2 className="text-lg font-bold text-[#25382D]">
+            <div className="w-8 h-8 rounded-lg bg-[#EFF6FF] text-[#1D4ED8] flex items-center justify-center shrink-0">
+              <FileSpreadsheet className="w-4 h-4" />
+            </div>
+            <h2 className="text-lg font-bold text-[#0F172A]">
               {isHi ? 'Mahine ka Kharcha Spreadsheet' : 'Monthly Spending Spreadsheet'}
             </h2>
           </div>
-          <p className="text-xs text-[#64756A] mt-0.5">
+          <p className="text-xs text-[#475569] mt-0.5">
             {isHi
               ? 'Line items, unit rates, taxes aur category kharcha ki vistaar soochi.'
               : 'Spreadsheet ledger view of line items, unit prices, taxes, and category totals.'}
@@ -263,7 +265,7 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
           {/* Previous Month */}
           <button
             onClick={handlePrevMonth}
-            className="p-1.5 rounded-lg border border-[#E2E7E2] bg-[#F7F8F5] text-[#25382D] hover:bg-[#DCE7DD] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] text-[#0F172A] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] transition-colors cursor-pointer"
             aria-label="Previous month"
             title="Previous month"
           >
@@ -274,7 +276,7 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
           <select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(Number(e.target.value))}
-            className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#E2E7E2] bg-[#F7F8F5] text-[#25382D] focus:outline-hidden focus:border-[#476C58] cursor-pointer"
+            className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] text-[#0F172A] focus:outline-hidden focus:border-[#1D4ED8] cursor-pointer"
             aria-label="Select month"
           >
             {MONTH_NAMES.map((name, idx) => (
@@ -288,7 +290,7 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#E2E7E2] bg-[#F7F8F5] text-[#25382D] focus:outline-hidden focus:border-[#476C58] cursor-pointer font-mono"
+            className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] text-[#0F172A] focus:outline-hidden focus:border-[#1D4ED8] cursor-pointer font-mono"
             aria-label="Select year"
           >
             {AVAILABLE_YEARS.map((yr) => (
@@ -301,7 +303,7 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
           {/* Next Month */}
           <button
             onClick={handleNextMonth}
-            className="p-1.5 rounded-lg border border-[#E2E7E2] bg-[#F7F8F5] text-[#25382D] hover:bg-[#DCE7DD] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] text-[#0F172A] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] transition-colors cursor-pointer"
             aria-label="Next month"
             title="Next month"
           >
@@ -312,35 +314,35 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
           <button
             onClick={handleExportCSV}
             disabled={spreadsheetRows.length === 0}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E2E7E2] bg-[#FFFFFF] text-xs font-medium text-[#25382D] hover:bg-[#F7F8F5] transition-colors cursor-pointer disabled:opacity-40"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E2E8F0] bg-[#FFFFFF] text-xs font-semibold text-[#0F172A] hover:bg-[#EFF6FF] hover:text-[#1D4ED8] hover:border-[#BFDBFE] transition-colors cursor-pointer disabled:opacity-40"
             title="Export monthly spreadsheet to CSV"
           >
-            <Download className="w-3.5 h-3.5 text-[#476C58]" />
+            <Download className="w-3.5 h-3.5 text-[#1D4ED8]" />
             <span>{isHi ? 'CSV Download' : 'Export CSV'}</span>
           </button>
         </div>
       </div>
 
-      {/* 2. Quick Monthly Summary Pill Strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#F7F8F5] p-3 rounded-xl border border-[#E2E7E2] text-xs">
+      {/* 2. Quick Monthly Summary Strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#F8FAFC] p-3 rounded-xl border border-[#E2E8F0] text-xs">
         <div>
-          <span className="text-[11px] text-[#64756A] block">{isHi ? 'Chuna Hua Mahina' : 'Selected Period'}</span>
-          <span className="font-bold text-[#25382D] text-sm mt-0.5 block">
+          <span className="text-[11px] font-medium text-[#475569] block">{isHi ? 'Chuna Hua Mahina' : 'Selected Period'}</span>
+          <span className="font-bold text-[#0F172A] text-sm mt-0.5 block">
             {monthName} {selectedYear}
           </span>
         </div>
 
         <div>
-          <span className="text-[11px] text-[#64756A] block">{isHi ? 'Kul Mahine Ka Kharcha' : 'Total Monthly Spending'}</span>
+          <span className="text-[11px] font-medium text-[#475569] block">{isHi ? 'Kul Mahine Ka Kharcha' : 'Total Monthly Spending'}</span>
           <CurrencyDisplay
             amountMinor={totalSpendMinor}
-            className="font-bold text-[#25382D] text-sm mt-0.5 block"
+            className="font-bold text-[#0F172A] text-sm mt-0.5 block"
           />
         </div>
 
         <div>
-          <span className="text-[11px] text-[#64756A] block">{isHi ? 'Darj Ki Gayi Khareed' : 'Recorded Purchases'}</span>
-          <span className="font-bold text-[#25382D] text-sm mt-0.5 block">
+          <span className="text-[11px] font-medium text-[#475569] block">{isHi ? 'Darj Ki Gayi Khareed' : 'Recorded Purchases'}</span>
+          <span className="font-bold text-[#0F172A] text-sm mt-0.5 block">
             {isHi
               ? `${monthReceipts.length} billein (${spreadsheetRows.length} items)`
               : `${monthReceipts.length} bills (${spreadsheetRows.length} line items)`}
@@ -348,66 +350,66 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
         </div>
 
         <div>
-          <span className="text-[11px] text-[#64756A] block">{isHi ? 'GST aur Tax' : 'GST & Taxes'}</span>
+          <span className="text-[11px] font-medium text-[#475569] block">{isHi ? 'GST aur Tax' : 'GST & Taxes'}</span>
           <CurrencyDisplay
             amountMinor={totalTaxMinor}
-            className="font-bold text-[#64756A] text-sm mt-0.5 block"
+            className="font-bold text-[#475569] text-sm mt-0.5 block"
           />
         </div>
       </div>
 
       {/* 3. The Spreadsheet Table */}
-      <div className="border border-[#D4DDD5] rounded-xl overflow-hidden shadow-2xs">
+      <div className="border border-[#CBD5E1] rounded-xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto max-h-[440px]">
           <table className="w-full text-left border-collapse text-xs select-text">
             {/* Spreadsheet Table Header */}
-            <thead className="sticky top-0 z-10 bg-[#EDF1EE] border-b border-[#D4DDD5] text-[#25382D] font-mono shadow-2xs">
+            <thead className="sticky top-0 z-10 bg-[#F1F5F9] border-b border-[#CBD5E1] text-[#0F172A] font-mono shadow-2xs">
               <tr>
-                <th className="py-2.5 px-3 font-semibold w-10 text-center border-r border-[#D4DDD5] bg-[#E5EBE6]">
+                <th className="py-2.5 px-3 font-semibold w-10 text-center border-r border-[#CBD5E1] bg-[#E2E8F0]">
                   #
                 </th>
-                <th className="py-2.5 px-3 font-semibold w-24 border-r border-[#D4DDD5]">
+                <th className="py-2.5 px-3 font-semibold w-24 border-r border-[#CBD5E1]">
                   {isHi ? 'Tarikh' : 'Date'}
                 </th>
-                <th className="py-2.5 px-3 font-semibold border-r border-[#D4DDD5] min-w-[160px]">
+                <th className="py-2.5 px-3 font-semibold border-r border-[#CBD5E1] min-w-[160px]">
                   {isHi ? 'Vyapari / Dukaan' : 'Supplier / Payee'}
                 </th>
-                <th className="py-2.5 px-3 font-semibold border-r border-[#D4DDD5] min-w-[130px]">
-                  {isHi ? 'Category' : 'Category'}
+                <th className="py-2.5 px-3 font-semibold border-r border-[#CBD5E1] min-w-[130px]">
+                  Category
                 </th>
-                <th className="py-2.5 px-3 font-semibold border-r border-[#D4DDD5] min-w-[220px]">
+                <th className="py-2.5 px-3 font-semibold border-r border-[#CBD5E1] min-w-[220px]">
                   {isHi ? 'Saman ka Vivaran' : 'Item Description'}
                 </th>
-                <th className="py-2.5 px-3 font-semibold text-right w-16 border-r border-[#D4DDD5]">
-                  {isHi ? 'Qty' : 'Qty'}
+                <th className="py-2.5 px-3 font-semibold text-right w-16 border-r border-[#CBD5E1]">
+                  Qty
                 </th>
-                <th className="py-2.5 px-3 font-semibold w-16 border-r border-[#D4DDD5]">
-                  {isHi ? 'Unit' : 'Unit'}
+                <th className="py-2.5 px-3 font-semibold w-16 border-r border-[#CBD5E1]">
+                  Unit
                 </th>
-                <th className="py-2.5 px-3 font-semibold text-right border-r border-[#D4DDD5] min-w-[100px]">
+                <th className="py-2.5 px-3 font-semibold text-right border-r border-[#CBD5E1] min-w-[100px]">
                   {isHi ? 'Unit Bhaav' : 'Unit Price'}
                 </th>
-                <th className="py-2.5 px-3 font-semibold text-right border-r border-[#D4DDD5] min-w-[90px]">
-                  {isHi ? 'GST' : 'GST'}
+                <th className="py-2.5 px-3 font-semibold text-right border-r border-[#CBD5E1] min-w-[90px]">
+                  GST
                 </th>
-                <th className="py-2.5 px-3 font-semibold text-right min-w-[110px] bg-[#E5EBE6]">
+                <th className="py-2.5 px-3 font-semibold text-right min-w-[110px] bg-[#E2E8F0]">
                   {isHi ? 'Kul Rakam' : 'Total'}
                 </th>
               </tr>
             </thead>
 
             {/* Spreadsheet Rows */}
-            <tbody className="divide-y divide-[#E2E7E2] bg-[#FFFFFF]">
+            <tbody className="divide-y divide-[#E2E8F0] bg-[#FFFFFF]">
               {spreadsheetRows.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="py-12 text-center text-xs text-[#64756A] space-y-1">
-                    <Layers className="w-6 h-6 mx-auto text-[#A9BCAE] mb-2" />
-                    <p className="font-semibold text-[#25382D]">
+                  <td colSpan={10} className="py-12 text-center text-xs text-[#475569] space-y-1">
+                    <Layers className="w-6 h-6 mx-auto text-[#93C5FD] mb-2" />
+                    <p className="font-semibold text-[#0F172A]">
                       {isHi
                         ? `${monthName} ${selectedYear} ke liye koi khareed darj nahi hai`
                         : `No purchases recorded for ${monthName} ${selectedYear}`}
                     </p>
-                    <p className="text-[11px]">
+                    <p className="text-[11px] text-[#475569]">
                       {isHi
                         ? 'Pichle mahine dekhne ke liye upar month switcher use karein ya Scan tab me jakar bill upload karein.'
                         : 'Use the month switcher above to browse previous months or upload a receipt in the Scan tab.'}
@@ -418,41 +420,41 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
                 spreadsheetRows.map((row) => (
                   <tr
                     key={`${row.receiptId}-${row.rowIndex}`}
-                    className="hover:bg-[#F7F8F5] transition-colors border-b border-[#E8ECE8]"
+                    className="hover:bg-[#F8FAFC] transition-colors border-b border-[#E2E8F0]"
                   >
-                    <td className="py-2 px-3 text-center font-mono text-[11px] text-[#64756A] border-r border-[#E8ECE8] bg-[#FAFBF9]">
+                    <td className="py-2 px-3 text-center font-mono text-[11px] text-[#475569] border-r border-[#E2E8F0] bg-[#F8FAFC]">
                       {row.rowIndex}
                     </td>
-                    <td className="py-2 px-3 font-mono text-[11px] text-[#25382D] border-r border-[#E8ECE8] whitespace-nowrap">
+                    <td className="py-2 px-3 font-mono text-[11px] text-[#0F172A] border-r border-[#E2E8F0] whitespace-nowrap">
                       {row.date}
                     </td>
-                    <td className="py-2 px-3 font-medium text-[#25382D] border-r border-[#E8ECE8] truncate max-w-[180px]">
+                    <td className="py-2 px-3 font-semibold text-[#0F172A] border-r border-[#E2E8F0] truncate max-w-[180px]">
                       {row.supplier}
                     </td>
-                    <td className="py-2 px-3 text-[#64756A] border-r border-[#E8ECE8] whitespace-nowrap">
+                    <td className="py-2 px-3 text-[#475569] border-r border-[#E2E8F0] whitespace-nowrap">
                       {tCategory(row.category)}
                     </td>
-                    <td className="py-2 px-3 text-[#25382D] border-r border-[#E8ECE8] truncate max-w-[240px]">
+                    <td className="py-2 px-3 text-[#0F172A] border-r border-[#E2E8F0] truncate max-w-[240px]">
                       {row.description}
                     </td>
-                    <td className="py-2 px-3 text-right font-mono text-[#25382D] border-r border-[#E8ECE8]">
+                    <td className="py-2 px-3 text-right font-mono text-[#0F172A] border-r border-[#E2E8F0]">
                       {row.qty}
                     </td>
-                    <td className="py-2 px-3 text-[#64756A] border-r border-[#E8ECE8]">
+                    <td className="py-2 px-3 text-[#475569] border-r border-[#E2E8F0]">
                       {row.unit}
                     </td>
-                    <td className="py-2 px-3 text-right border-r border-[#E8ECE8] whitespace-nowrap">
+                    <td className="py-2 px-3 text-right border-r border-[#E2E8F0] whitespace-nowrap">
                       <CurrencyDisplay
                         amountMinor={row.unitPriceMinor}
                         showDecimals
-                        className="font-medium text-[#25382D]"
+                        className="font-medium text-[#0F172A]"
                       />
                     </td>
-                    <td className="py-2 px-3 text-right border-r border-[#E8ECE8] whitespace-nowrap text-[#64756A]">
+                    <td className="py-2 px-3 text-right border-r border-[#E2E8F0] whitespace-nowrap text-[#475569]">
                       <CurrencyDisplay amountMinor={row.taxMinor} />
                     </td>
-                    <td className="py-2 px-3 text-right font-bold whitespace-nowrap bg-[#FAFBF9]">
-                      <CurrencyDisplay amountMinor={row.totalMinor} className="text-[#25382D]" />
+                    <td className="py-2 px-3 text-right font-bold whitespace-nowrap bg-[#F8FAFC]">
+                      <CurrencyDisplay amountMinor={row.totalMinor} className="text-[#0F172A]" />
                     </td>
                   </tr>
                 ))
@@ -461,21 +463,21 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
 
             {/* Spreadsheet Total Summary Row */}
             {spreadsheetRows.length > 0 && (
-              <tfoot className="bg-[#EDF1EE] border-t-2 border-[#D4DDD5] text-xs font-bold text-[#25382D]">
+              <tfoot className="bg-[#F1F5F9] border-t-2 border-[#CBD5E1] text-xs font-bold text-[#0F172A]">
                 <tr>
-                  <td colSpan={5} className="py-2.5 px-3 text-right border-r border-[#D4DDD5] font-sans">
+                  <td colSpan={5} className="py-2.5 px-3 text-right border-r border-[#CBD5E1] font-sans">
                     {isHi ? 'KUL MAHINE KA KHARCHA (SUM):' : 'TOTAL MONTHLY SPENDING (SUM):'}
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono border-r border-[#D4DDD5]">
+                  <td className="py-2.5 px-3 text-right font-mono border-r border-[#CBD5E1]">
                     {spreadsheetRows.reduce((acc, r) => acc + r.qty, 0)}
                   </td>
-                  <td className="py-2.5 px-3 border-r border-[#D4DDD5]">-</td>
-                  <td className="py-2.5 px-3 text-right border-r border-[#D4DDD5]">-</td>
-                  <td className="py-2.5 px-3 text-right border-r border-[#D4DDD5]">
+                  <td className="py-2.5 px-3 border-r border-[#CBD5E1]">-</td>
+                  <td className="py-2.5 px-3 text-right border-r border-[#CBD5E1]">-</td>
+                  <td className="py-2.5 px-3 text-right border-r border-[#CBD5E1]">
                     <CurrencyDisplay amountMinor={totalTaxMinor} />
                   </td>
-                  <td className="py-2.5 px-3 text-right font-mono text-sm bg-[#E5EBE6]">
-                    <CurrencyDisplay amountMinor={totalSpendMinor} className="text-[#25382D]" />
+                  <td className="py-2.5 px-3 text-right font-mono text-sm bg-[#E2E8F0]">
+                    <CurrencyDisplay amountMinor={totalSpendMinor} className="text-[#0F172A]" />
                   </td>
                 </tr>
               </tfoot>
@@ -487,7 +489,7 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
       {/* 4. Category Breakdown Subtotals for the Month */}
       {categorySummary.length > 0 && (
         <div className="pt-2">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-[#64756A] block mb-2">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#475569] block mb-2">
             {isHi
               ? `${monthName} ${selectedYear} ke liye Category Breakdown`
               : `Category Breakdown for ${monthName} ${selectedYear}`}
@@ -498,11 +500,11 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
               return (
                 <div
                   key={cat}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#F7F8F5] border border-[#E2E7E2] text-xs"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0] text-xs"
                 >
-                  <span className="font-semibold text-[#25382D]">{tCategory(cat)}:</span>
-                  <CurrencyDisplay amountMinor={data.totalMinor} className="font-bold text-[#476C58]" />
-                  <span className="text-[10px] text-[#64756A]">({percentage}%)</span>
+                  <span className="font-semibold text-[#0F172A]">{tCategory(cat)}:</span>
+                  <CurrencyDisplay amountMinor={data.totalMinor} className="font-bold text-[#1D4ED8]" />
+                  <span className="text-[10px] text-[#475569]">({percentage}%)</span>
                 </div>
               );
             })}

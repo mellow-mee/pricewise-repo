@@ -159,6 +159,13 @@ export interface PriorityInsight {
   isDemo?: boolean;
 }
 
+export interface PageAssistantContext {
+  route: string;
+  pageTitle: string;
+  visibleContentSummary?: string;
+  metrics?: Record<string, string | number>;
+}
+
 export interface AssistantChatMessage {
   id: string;
   sender: 'user' | 'assistant';

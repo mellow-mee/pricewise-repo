@@ -77,10 +77,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
       {/* A. Header */}
       <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl sm:text-[28px] font-bold tracking-tight text-[#202B27]">
+          <h1 className="text-2xl sm:text-[28px] font-bold tracking-tight text-[#0F172A]">
             {isHi ? 'Dukaan Overview' : 'Business overview'}
           </h1>
-          <p className="text-sm sm:text-base text-[#65736C] mt-0.5">
+          <p className="text-sm sm:text-base text-[#475569] mt-0.5">
             {isHi
               ? 'Aapke kharche, purchase records aur bachat ke avasar.'
               : 'Your purchases, records and savings opportunities.'}
@@ -88,23 +88,25 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
 
         {business?.name && (
-          <div className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EAF4ED] border border-[#CDE8D8] text-xs font-medium text-[#216747]">
-            <span className="w-2 h-2 rounded-full bg-[#216747]"></span>
-            <span>{business.name}</span>
+          <div className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EFF6FF] border border-[#BFDBFE] text-xs font-medium text-[#1D4ED8]">
+            <span className="w-2 h-2 rounded-full bg-[#1D4ED8]"></span>
+            <span className="font-semibold">{business.name}</span>
           </div>
         )}
       </section>
 
-      {/* B. Card 1 — Total Purchases This Month (Full-width Forest Green Hero) */}
+      {/* B. Card 1 — Total Purchases This Month (White/Near-White Card Background with Primary Blue CTA) */}
       <section
         aria-label="Total purchases this month"
-        className="bg-[#216747] text-white rounded-2xl p-6 sm:p-7 shadow-xs relative overflow-hidden transition-all"
+        className="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-6 sm:p-7 shadow-xs relative overflow-hidden transition-all"
       >
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 relative z-10">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-[#EAF4ED]/90 text-sm font-medium">
-              <ReceiptIcon className="w-4 h-4 text-[#A8D7B8]" />
-              <span>
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-[#EFF6FF] text-[#1D4ED8] flex items-center justify-center shrink-0">
+                <ReceiptIcon className="w-4 h-4" />
+              </div>
+              <span className="text-sm font-semibold text-[#334155]">
                 {isHi ? 'Is Mahine Ka Kharcha' : 'Total purchases this month'}
               </span>
             </div>
@@ -112,21 +114,21 @@ export const HomeView: React.FC<HomeViewProps> = ({
             <div className="flex items-baseline gap-3 flex-wrap">
               <CurrencyDisplay
                 amountMinor={summary.currentMonthSpendingMinor}
-                className="text-3xl sm:text-4xl font-bold tracking-tight text-white tabular-nums"
+                className="text-3xl sm:text-4xl font-bold tracking-tight text-[#0F172A] tabular-nums"
               />
-              <span className="text-xs sm:text-sm text-[#EAF4ED]/80 font-normal">
+              <span className="text-xs sm:text-sm text-[#475569] font-normal">
                 {isHi
                   ? `· ${currentMonthReceipts.length || receipts.length} bills is mahine darj hue`
                   : `· ${currentMonthReceipts.length || receipts.length} bills recorded this month`}
               </span>
             </div>
 
-            <p className="text-xs sm:text-sm text-[#EAF4ED]/85 leading-relaxed max-w-xl">
+            <p className="text-xs sm:text-sm text-[#334155] leading-relaxed max-w-xl">
               {summary.monthOverMonthChangePercentage !== 0 ? (
                 isHi ? (
                   <>
                     Pichhle mahine ke mukable kharcha{' '}
-                    <span className="font-semibold text-white">
+                    <span className="font-semibold text-[#0F172A]">
                       {Math.abs(summary.monthOverMonthChangePercentage)}%{' '}
                       {summary.monthOverMonthChangePercentage > 0 ? 'badha' : 'ghata'}
                     </span>
@@ -135,7 +137,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 ) : (
                   <>
                     Spending{' '}
-                    <span className="font-semibold text-white">
+                    <span className="font-semibold text-[#0F172A]">
                       {summary.monthOverMonthChangePercentage > 0 ? 'increased' : 'decreased'} by{' '}
                       {Math.abs(summary.monthOverMonthChangePercentage)}%
                     </span>{' '}
@@ -153,7 +155,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           <div className="shrink-0 self-start md:self-center">
             <button
               onClick={() => onNavigate('/ledger')}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 active:bg-white/30 border border-white/25 text-white text-xs sm:text-sm font-semibold transition-all cursor-pointer backdrop-blur-xs min-h-[44px]"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1D4ED8] hover:bg-[#1E40AF] active:bg-[#172554] text-white text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-xs min-h-[44px]"
             >
               <span>{isHi ? 'Purchase Ledger Dekhein' : 'View purchase ledger'}</span>
               <ArrowRight className="w-4 h-4 text-white" />
@@ -162,18 +164,18 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
       </section>
 
-      {/* C. Card 2 — Possible Savings (Full-width Pale Green Card) */}
+      {/* C. Card 2 — Possible Savings (White/Near-White Card with Light Blue Highlights & Primary Blue CTA) */}
       <section
         aria-label="Possible savings"
-        className="bg-[#EAF4ED] border border-[#CDE8D8] rounded-2xl p-5 sm:p-6 shadow-xs transition-all"
+        className="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-5 sm:p-6 shadow-xs transition-all"
       >
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-[#216747]/10 flex items-center justify-center shrink-0">
-                <TrendingDown className="w-4 h-4 text-[#216747]" />
+              <div className="w-7 h-7 rounded-lg bg-[#EFF6FF] text-[#1D4ED8] flex items-center justify-center shrink-0">
+                <TrendingDown className="w-4 h-4" />
               </div>
-              <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-[#216747]">
+              <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-[#1D4ED8]">
                 {isHi ? 'Sambhavit Bachat' : 'Possible savings'}
               </span>
             </div>
@@ -181,16 +183,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
             <div className="flex items-baseline gap-3 flex-wrap">
               <CurrencyDisplay
                 amountMinor={summary.potentialDifferenceMinor || 0}
-                className="text-2xl sm:text-[32px] font-bold text-[#216747] tabular-nums tracking-tight"
+                className="text-2xl sm:text-[32px] font-bold text-[#0F172A] tabular-nums tracking-tight"
               />
               {summary.differencePercentage !== null && summary.differencePercentage > 0 && (
-                <span className="text-xs sm:text-sm font-semibold text-[#216747] bg-white/70 px-2 py-0.5 rounded-md border border-[#CDE8D8]">
+                <span className="text-xs sm:text-sm font-semibold text-[#1D4ED8] bg-[#EFF6FF] px-2.5 py-0.5 rounded-md border border-[#BFDBFE]">
                   {isHi ? `Lagbhag ${summary.differencePercentage}% bachat` : `~${summary.differencePercentage}% opportunity`}
                 </span>
               )}
             </div>
 
-            <p className="text-xs sm:text-sm text-[#355B45] leading-relaxed max-w-2xl">
+            <p className="text-xs sm:text-sm text-[#334155] leading-relaxed max-w-2xl">
               {isHi
                 ? 'Bazaar rates ki tulna se anumanit bachat avasar. Ye anumanit bachat hai jo samaan dukaano ke thok bhaav par aadharit hai.'
                 : 'Estimated opportunity from price comparisons. Based on purchase prices from similar stores in your region.'}
@@ -200,9 +202,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
           <div className="shrink-0 self-start md:self-center">
             <button
               onClick={() => onNavigate('/save-more')}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#216747] hover:bg-[#1a5339] active:bg-[#15422d] text-white text-xs sm:text-sm font-semibold transition-colors shadow-xs cursor-pointer min-h-[44px]"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1D4ED8] hover:bg-[#1E40AF] active:bg-[#172554] text-white text-xs sm:text-sm font-semibold transition-colors shadow-xs cursor-pointer min-h-[44px]"
             >
-              <Sparkles className="w-4 h-4 text-[#A8D7B8]" />
+              <Sparkles className="w-4 h-4 text-[#BFDBFE]" />
               <span>{isHi ? 'Bachat Avasar Dekhein' : 'Explore savings opportunities'}</span>
               <ArrowRight className="w-4 h-4 text-white" />
             </button>
@@ -212,55 +214,55 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
       {/* D. Card 3 (Bills Recorded) & Card 4 (Needs Review) — Side-by-Side on Desktop */}
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-        {/* Card 3: Bills Recorded */}
+        {/* Card 3: Bills Recorded (White card, light blue icon, dark slate text) */}
         <div
           onClick={() => onNavigate('/ledger')}
-          className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-5 sm:p-6 shadow-xs hover:border-[#216747]/40 hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between space-y-4"
+          className="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-5 sm:p-6 shadow-xs hover:border-[#1D4ED8]/40 hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between space-y-4"
         >
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-[#65736C]">
+            <span className="text-sm font-semibold text-[#334155]">
               {isHi ? 'Darj kiye gaye Bills' : 'Bills recorded'}
             </span>
-            <div className="w-9 h-9 rounded-xl bg-[#EAF4ED] text-[#216747] flex items-center justify-center shrink-0">
-              <FileCheck className="w-5 h-5 text-[#216747]" />
+            <div className="w-9 h-9 rounded-xl bg-[#EFF6FF] text-[#1D4ED8] flex items-center justify-center shrink-0">
+              <FileCheck className="w-5 h-5" />
             </div>
           </div>
 
           <div className="space-y-1">
-            <span className="text-2xl sm:text-3xl font-bold text-[#202B27] tabular-nums block">
+            <span className="text-2xl sm:text-3xl font-bold text-[#0F172A] tabular-nums block">
               {recordedCount || receipts.length}
             </span>
-            <div className="flex items-center gap-1.5 text-xs font-medium text-[#216747]">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-[#1D4ED8]">
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>{isHi ? 'Safaltapoorvak saved' : 'Successfully saved'}</span>
             </div>
           </div>
 
-          <div className="pt-2 border-t border-[#E2E7E2]/60 flex items-center justify-between text-xs font-semibold text-[#216747]">
+          <div className="pt-2 border-t border-[#E2E8F0] flex items-center justify-between text-xs font-semibold text-[#1D4ED8]">
             <span>{isHi ? 'Ledger mein dekhein' : 'View in ledger'}</span>
             <ChevronRight className="w-4 h-4" />
           </div>
         </div>
 
-        {/* Card 4: Needs Review */}
+        {/* Card 4: Needs Review (Orange warning background & text for items needing attention) */}
         <div
           onClick={() => onNavigate('/ledger?filter=needs_review')}
-          className="bg-[#FFF3D8] border border-[#F3E2CE] rounded-2xl p-5 sm:p-6 shadow-xs hover:border-[#E8C896] hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between space-y-4 text-[#754A0A]"
+          className="bg-[#FFF7ED] border border-[#FED7AA] rounded-2xl p-5 sm:p-6 shadow-xs hover:border-[#FDBA74] hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between space-y-4 text-[#C2410C]"
         >
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-[#754A0A]">
+            <span className="text-sm font-semibold text-[#C2410C]">
               {isHi ? 'Review ki Zaroorat' : 'Needs review'}
             </span>
-            <div className="w-9 h-9 rounded-xl bg-[#FFE7B3] text-[#754A0A] flex items-center justify-center shrink-0">
-              <AlertCircle className="w-5 h-5 text-[#754A0A]" />
+            <div className="w-9 h-9 rounded-xl bg-[#FFEDD5] text-[#EA580C] flex items-center justify-center shrink-0">
+              <AlertCircle className="w-5 h-5 text-[#EA580C]" />
             </div>
           </div>
 
           <div className="space-y-1">
-            <span className="text-2xl sm:text-3xl font-bold text-[#754A0A] tabular-nums block">
+            <span className="text-2xl sm:text-3xl font-bold text-[#9A3412] tabular-nums block">
               {needsReviewCount}
             </span>
-            <div className="flex items-center gap-1.5 text-xs font-medium text-[#754A0A]">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-[#C2410C]">
               <span>
                 {needsReviewCount === 0
                   ? isHi
@@ -273,7 +275,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </div>
           </div>
 
-          <div className="pt-2 border-t border-[#F3E2CE] flex items-center justify-between text-xs font-semibold text-[#754A0A]">
+          <div className="pt-2 border-t border-[#FED7AA] flex items-center justify-between text-xs font-semibold text-[#C2410C]">
             <span>{isHi ? 'Review items filter karein' : 'Filter review items'}</span>
             <ChevronRight className="w-4 h-4" />
           </div>
@@ -283,14 +285,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
       {/* E. Section 5 — Recent Purchases */}
       <section
         aria-label="Recent purchases"
-        className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-5 sm:p-7 shadow-xs space-y-4"
+        className="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-5 sm:p-7 shadow-xs space-y-4"
       >
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-[#202B27]">
+            <h2 className="text-base sm:text-lg font-bold text-[#0F172A]">
               {isHi ? 'Haal hi ke Purchases' : 'Recent purchases'}
             </h2>
-            <p className="text-xs text-[#65736C] mt-0.5">
+            <p className="text-xs text-[#475569] mt-0.5">
               {isHi
                 ? 'Khate mein darj aakhiri purchases aur invoices'
                 : 'Latest purchases added to your ledger'}
@@ -299,14 +301,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
           <button
             onClick={() => onNavigate('/ledger')}
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#216747] hover:text-[#1a5339] hover:underline cursor-pointer transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#1D4ED8] hover:text-[#1E40AF] hover:underline cursor-pointer transition-colors"
           >
             <span>{isHi ? 'Sabhi Dekhein' : 'View all'}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        <div className="divide-y divide-[#E2E7E2]">
+        <div className="divide-y divide-[#E2E8F0]">
           {recentReceipts.map((rec) => {
             const isPending =
               rec.status === 'pending_review' ||
@@ -317,17 +319,17 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <div
                 key={rec.id}
                 onClick={() => onNavigate('/ledger')}
-                className="py-3.5 flex items-center justify-between gap-3 sm:gap-4 hover:bg-[#F5F7F6] px-2.5 rounded-xl transition-colors cursor-pointer"
+                className="py-3.5 flex items-center justify-between gap-3 sm:gap-4 hover:bg-[#F8FAFC] px-2.5 rounded-xl transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#EAF4ED] text-[#216747] flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#EFF6FF] text-[#1D4ED8] flex items-center justify-center shrink-0">
                     <ReceiptIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                   <div className="min-w-0">
-                    <span className="text-sm sm:text-base font-semibold text-[#202B27] block truncate">
+                    <span className="text-sm sm:text-base font-semibold text-[#0F172A] block truncate">
                       {rec.merchantName}
                     </span>
-                    <div className="flex items-center gap-2 text-xs text-[#65736C] flex-wrap mt-0.5">
+                    <div className="flex items-center gap-2 text-xs text-[#475569] flex-wrap mt-0.5">
                       <span>{rec.transactionDate}</span>
                       <span>·</span>
                       <span>
@@ -341,7 +343,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                       {rec.invoiceNumber && (
                         <>
                           <span>·</span>
-                          <span className="font-mono text-[#65736C]">
+                          <span className="font-mono text-[#475569]">
                             {rec.invoiceNumber}
                           </span>
                         </>
@@ -353,17 +355,17 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 <div className="text-right shrink-0 flex flex-col items-end gap-1">
                   <CurrencyDisplay
                     amountMinor={rec.totalMinor}
-                    className="text-sm sm:text-base font-bold text-[#202B27] tabular-nums block"
+                    className="text-sm sm:text-base font-bold text-[#0F172A] tabular-nums block"
                   />
                   {isPending ? (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#754A0A] bg-[#FFF3D8] border border-[#F3E2CE] px-2 py-0.5 rounded-md">
-                      <AlertCircle className="w-3 h-3 text-[#754A0A]" />
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#C2410C] bg-[#FFF7ED] border border-[#FED7AA] px-2 py-0.5 rounded-md">
+                      <AlertCircle className="w-3 h-3 text-[#C2410C]" />
                       <span>{isHi ? 'Review Baaqi' : 'Needs Review'}</span>
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#216747] bg-[#EAF4ED] border border-[#CDE8D8] px-2 py-0.5 rounded-md">
-                      <CheckCircle2 className="w-3 h-3 text-[#216747]" />
-                      <span>{isHi ? 'Confirmed' : 'Confirmed'}</span>
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#1D4ED8] bg-[#EFF6FF] border border-[#BFDBFE] px-2 py-0.5 rounded-md">
+                      <CheckCircle2 className="w-3 h-3 text-[#1D4ED8]" />
+                      <span>Confirmed</span>
                     </span>
                   )}
                 </div>

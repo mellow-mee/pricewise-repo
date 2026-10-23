@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Navbar } from './components/Navbar.tsx';
 import { BottomNav } from './components/BottomNav.tsx';
+import { PageAssistantWidget } from './components/PageAssistantWidget.tsx';
 import { HomeView } from './views/HomeView.tsx';
 import { ScanView } from './views/ScanView.tsx';
 import { LedgerView } from './views/LedgerView.tsx';
@@ -143,13 +144,13 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F7F8F5] flex flex-col items-center justify-center space-y-4">
-        <div className="w-12 h-12 rounded-xl bg-[#DCE7DD] text-[#476C58] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center space-y-4">
+        <div className="w-12 h-12 rounded-xl bg-[#EFF6FF] text-[#1D4ED8] flex items-center justify-center">
           <RefreshCw className="w-6 h-6 animate-spin" />
         </div>
         <div className="text-center space-y-1">
-          <h2 className="text-base font-semibold text-[#25382D]">Loading Pricewise</h2>
-          <p className="text-xs text-[#64756A]">Preparing your purchasing intelligence ledger...</p>
+          <h2 className="text-base font-semibold text-[#0F172A]">Loading Pricewise</h2>
+          <p className="text-xs text-[#475569]">Preparing your purchasing intelligence ledger...</p>
         </div>
       </div>
     );
@@ -157,16 +158,16 @@ export default function App() {
 
   return (
     <LanguageProvider>
-      <div className="min-h-screen bg-[#F7F8F5] text-[#25382D] flex flex-col font-sans">
+      <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col font-sans">
         {/* Toast Notification */}
         {toastMessage && (
-          <div className="fixed top-18 right-4 z-50 bg-[#FFFFFF] border border-[#E2E7E2] px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2.5 text-xs animate-in fade-in slide-in-from-top-2">
+          <div className="fixed top-18 right-4 z-50 bg-[#FFFFFF] border border-[#E2E8F0] px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2.5 text-xs animate-in fade-in slide-in-from-top-2">
             {toastMessage.type === 'success' ? (
-              <CheckCircle2 className="w-4 h-4 text-[#2E7D4F] shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-[#1D4ED8] shrink-0" />
             ) : (
-              <AlertCircle className="w-4 h-4 text-[#476C58] shrink-0" />
+              <AlertCircle className="w-4 h-4 text-[#D97706] shrink-0" />
             )}
-            <span className="font-medium text-[#25382D]">{toastMessage.text}</span>
+            <span className="font-medium text-[#0F172A]">{toastMessage.text}</span>
           </div>
         )}
 
@@ -217,6 +218,16 @@ export default function App() {
             <AskView business={business} receipts={receipts} onNavigate={navigateTo} />
           )}
         </main>
+
+        {/* Floating Page-Aware AI Assistant (Available at bottom right of each page) */}
+        <PageAssistantWidget
+          currentRoute={currentRoute}
+          business={business}
+          receipts={receipts}
+          opportunities={opportunities}
+          benchmarks={benchmarks}
+          onNavigate={navigateTo}
+        />
 
         {/* Bottom Navigation (Mobile Only) */}
         <BottomNav currentRoute={currentRoute} onRouteChange={navigateTo} />

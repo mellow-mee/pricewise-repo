@@ -1,29 +1,29 @@
 @import "tailwindcss";
 
 @theme {
-  --color-sage-bg: #F7F8F5;
-  --color-sage-card: #FFFFFF;
-  --color-sage-primary: #476C58;
-  --color-sage-primary-hover: #3a5948;
-  --color-sage-dark: #25382D;
-  --color-sage-muted: #64756A;
-  --color-sage-pale: #DCE7DD;
-  --color-sage-border: #E2E7E2;
-  --color-sage-amber: #C0772C;
-  --color-sage-amber-bg: #FDF8F0;
-  --color-sage-red: #B83E3E;
-  --color-sage-red-bg: #FDF2F2;
-  --color-sage-green: #2E7D4F;
-  --color-sage-green-bg: #EDF7F1;
+  --color-page-bg: #F8FAFC;
+  --color-card-bg: #FFFFFF;
+  --color-primary-blue: #1D4ED8;
+  --color-primary-blue-hover: #1E40AF;
+  --color-light-blue: #EFF6FF;
+  --color-light-blue-pale: #DBEAFE;
+  --color-dark-slate: #0F172A;
+  --color-slate-body: #1E293B;
+  --color-slate-muted: #475569;
+  --color-border-subtle: #E2E8F0;
+  --color-warning-orange: #D97706;
+  --color-warning-orange-bg: #FFF7ED;
+  --color-urgent-red: #DC2626;
+  --color-urgent-red-bg: #FEF2F2;
 
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Inter', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, sans-serif;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--color-sage-bg);
-  color: var(--color-sage-dark);
+  background-color: var(--color-page-bg);
+  color: var(--color-slate-body);
 }
 
 /* Custom scrollbars for ledger and tables */
@@ -35,9 +35,9 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #DCE7DD;
+  background: #CBD5E1;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #A9BCAE;
+  background: #94A3B8;
 }
