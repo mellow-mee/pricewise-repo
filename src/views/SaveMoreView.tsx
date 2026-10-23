@@ -184,63 +184,7 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
         </div>
       </div>
 
-      {/* 3. Collective Participation & Privacy Consent Card */}
-      <div className="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1 max-w-2xl">
-          <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-[#1D4ED8]" />
-            <h3 className="text-sm font-bold text-[#0F172A]">
-              {isHi ? 'Samuhik Khareed Bhaav Network' : 'Collective Purchasing Intelligence Network'}
-            </h3>
-          </div>
-          <p className="text-xs text-[#475569] leading-relaxed">
-            {isHi
-              ? 'Benchmark network me shamil hone par aapke khareed bhaav anonymously 5+ vyapariyon ke sath aggregate hote hain. Bill number, dukan ka naam ya vyaktigat jankari kabhi share nahi hoti.'
-              : 'By voluntarily opting into the benchmark pool, your itemized purchase unit prices are anonymized, aggregated with at least 5 other independent businesses, and used to calculate regional median prices. Individual invoices, receipts, and merchant names are never shared.'}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3 shrink-0 self-start sm:self-auto">
-          <div className="text-right">
-            <span className="text-xs font-semibold text-[#0F172A] block">
-              {isHi
-                ? isOptedIn
-                  ? 'Network Sakriya Hai'
-                  : 'Yogdan Ruka Hua Hai'
-                : isOptedIn
-                ? 'Network Active'
-                : 'Participation Paused'}
-            </span>
-            <span className="text-[11px] text-[#475569]">
-              {isHi
-                ? isOptedIn
-                  ? 'Gumnam roop se yogdan de rahe hain'
-                  : 'Data share nahi ho raha hai'
-                : isOptedIn
-                ? 'Contributing anonymously'
-                : 'Not contributing data'}
-            </span>
-          </div>
-
-          <button
-            onClick={handleToggleConsent}
-            disabled={isUpdatingConsent}
-            className={`p-1 rounded-full transition-colors cursor-pointer ${
-              isOptedIn ? 'text-[#1D4ED8]' : 'text-[#94A3B8]'
-            }`}
-            title={isHi ? 'Benchmark bhagidari toggle karein' : 'Toggle Collective Benchmark Participation'}
-            aria-label="Toggle benchmark participation"
-          >
-            {isOptedIn ? (
-              <ToggleRight className="w-10 h-10" />
-            ) : (
-              <ToggleLeft className="w-10 h-10" />
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* 4. Tab Navigation for 3 States */}
+      {/* 3. Tab Navigation for 3 States */}
       <div className="flex items-center gap-2 border-b border-[#E2E8F0] pb-1 overflow-x-auto">
         <button
           onClick={() => setActiveTab('all')}
@@ -507,6 +451,62 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
             );
           }
         })}
+      </div>
+
+      {/* 5. Collective Participation & Privacy Consent Card (Placed at the bottom of the page) */}
+      <div className="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1 max-w-2xl">
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-[#1D4ED8]" />
+            <h3 className="text-sm font-bold text-[#0F172A]">
+              {isHi ? 'Samuhik Khareed Bhaav Network' : 'Collective Purchasing Intelligence Network'}
+            </h3>
+          </div>
+          <p className="text-xs text-[#475569] leading-relaxed">
+            {isHi
+              ? 'Benchmark network me shamil hone par aapke khareed bhaav anonymously 5+ vyapariyon ke sath aggregate hote hain. Bill number, dukan ka naam ya vyaktigat jankari kabhi share nahi hoti.'
+              : 'By voluntarily opting into the benchmark pool, your itemized purchase unit prices are anonymized, aggregated with at least 5 other independent businesses, and used to calculate regional median prices. Individual invoices, receipts, and merchant names are never shared.'}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0 self-start sm:self-auto">
+          <div className="text-right">
+            <span className="text-xs font-semibold text-[#0F172A] block">
+              {isHi
+                ? isOptedIn
+                  ? 'Network Sakriya Hai'
+                  : 'Yogdan Ruka Hua Hai'
+                : isOptedIn
+                ? 'Network Active'
+                : 'Participation Paused'}
+            </span>
+            <span className="text-[11px] text-[#475569]">
+              {isHi
+                ? isOptedIn
+                  ? 'Gumnam roop se yogdan de rahe hain'
+                  : 'Data share nahi ho raha hai'
+                : isOptedIn
+                ? 'Contributing anonymously'
+                : 'Not contributing data'}
+            </span>
+          </div>
+
+          <button
+            onClick={handleToggleConsent}
+            disabled={isUpdatingConsent}
+            className={`p-1 rounded-full transition-colors cursor-pointer ${
+              isOptedIn ? 'text-[#1D4ED8]' : 'text-[#94A3B8]'
+            }`}
+            title={isHi ? 'Benchmark bhagidari toggle karein' : 'Toggle Collective Benchmark Participation'}
+            aria-label="Toggle benchmark participation"
+          >
+            {isOptedIn ? (
+              <ToggleRight className="w-10 h-10" />
+            ) : (
+              <ToggleLeft className="w-10 h-10" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* --- BENCHMARK METHODOLOGY MODAL --- */}
