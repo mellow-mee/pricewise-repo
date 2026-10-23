@@ -144,12 +144,13 @@ async function bootstrapServer() {
   // 5. Grounded AI Purchasing Assistant
   app.post('/api/assistant/chat', async (req: Request, res: Response) => {
     try {
-      const { message } = req.body;
+      const { message, language } = req.body;
       if (!message || typeof message !== 'string') {
         return res.status(400).json({ success: false, error: 'Valid prompt message is required' });
       }
 
-      const answer = await answerPurchasingQuestion(message);
+      const lang = language === 'hi' ? 'hi' : 'en';
+      const answer = await answerPurchasingQuestion(message, lang);
       res.json({ success: true, data: answer });
     } catch (err: any) {
       console.error('Assistant error:', err);
@@ -182,8 +183,9 @@ async function bootstrapServer() {
     });
   }
 
-  app.listen(PORT, () => {
-    console.log(`[Pricewise] Server listening on port ${PORT} (mode: ${isProd ? 'production' : 'development'})`);
+  const port = Number(PORT) || 3000;
+  app.listen(port, '0.0.0.0', () => {
+    console.log(`[Pricewise] Server listening on http://0.0.0.0:${port} (mode: ${isProd ? 'production' : 'development'})`);
   });
 }
 

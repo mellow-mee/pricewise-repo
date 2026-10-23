@@ -34,6 +34,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { deleteReceipt, updateReceipt } from '../services/api.ts';
+import { useLanguage } from '../context/LanguageContext.tsx';
 
 interface LedgerViewProps {
   receipts: Receipt[];
@@ -48,6 +49,9 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
   onReceiptDeleted,
   onNavigate,
 }) => {
+  const { language, t, tCategory } = useLanguage();
+  const isHi = language === 'hi';
+
   // Shared Year & Month state driving both the yearly expenditure graph and the monthly spreadsheet
   const [spreadsheetYear, setSpreadsheetYear] = useState<number>(2026);
   const [spreadsheetMonth, setSpreadsheetMonth] = useState<number>(10); // October
@@ -181,10 +185,10 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#25382D]">
-            Expense Ledger
+            {t('ledger_title')}
           </h1>
           <p className="text-sm text-[#64756A] mt-0.5">
-            Monthly spending spreadsheets, verified supplier invoices, and audit history.
+            {t('ledger_subtitle')}
           </p>
         </div>
 
@@ -193,7 +197,7 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#476C58] text-white text-xs font-semibold hover:bg-[#3a5948] transition-colors shadow-xs cursor-pointer self-start sm:self-auto"
         >
           <Sparkles className="w-4 h-4" />
-          <span>Scan New Invoice</span>
+          <span>{isHi ? 'Naya Bill Scan Karein' : 'Scan New Invoice'}</span>
         </button>
       </div>
 
@@ -272,7 +276,7 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
             <Search className="w-4 h-4 text-[#64756A] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search by supplier, invoice number, or product item..."
+              placeholder={t('ledger_search_placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-[#E2E7E2] bg-[#F7F8F5] focus:outline-hidden focus:border-[#476C58]"
@@ -293,13 +297,13 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="px-3 py-2 text-xs rounded-xl border border-[#E2E7E2] bg-[#F7F8F5] text-[#25382D] focus:outline-hidden focus:border-[#476C58]"
           >
-            <option value="all">All Categories</option>
-            <option value="Packaging">Packaging</option>
-            <option value="Inventory & Food">Inventory & Food</option>
-            <option value="Cleaning & Hygiene">Cleaning & Hygiene</option>
-            <option value="Store Supplies">Store Supplies</option>
-            <option value="Utilities & Facilities">Utilities & Facilities</option>
-            <option value="Equipment">Equipment</option>
+            <option value="all">{t('ledger_filter_all_categories')}</option>
+            <option value="Packaging">{tCategory('Packaging')}</option>
+            <option value="Inventory & Food">{tCategory('Inventory & Food')}</option>
+            <option value="Cleaning & Hygiene">{tCategory('Cleaning & Hygiene')}</option>
+            <option value="Store Supplies">{tCategory('Store Supplies')}</option>
+            <option value="Utilities & Facilities">{tCategory('Utilities & Facilities')}</option>
+            <option value="Equipment">{tCategory('Equipment')}</option>
           </select>
 
           {/* Supplier Filter */}
@@ -308,7 +312,9 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
             onChange={(e) => setSelectedSupplier(e.target.value)}
             className="px-3 py-2 text-xs rounded-xl border border-[#E2E7E2] bg-[#F7F8F5] text-[#25382D] focus:outline-hidden focus:border-[#476C58]"
           >
-            <option value="all">All Suppliers ({uniqueSuppliers.length})</option>
+            <option value="all">
+              {isHi ? `Sabhi Suppliers (${uniqueSuppliers.length})` : `All Suppliers (${uniqueSuppliers.length})`}
+            </option>
             {uniqueSuppliers.map((s) => (
               <option key={s} value={s}>
                 {s}
@@ -322,10 +328,10 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
             onChange={(e) => setPeriodFilter(e.target.value as any)}
             className="px-3 py-2 text-xs rounded-xl border border-[#E2E7E2] bg-[#F7F8F5] text-[#25382D] focus:outline-hidden focus:border-[#476C58]"
           >
-            <option value="all">All Time (6 Months)</option>
-            <option value="oct_2026">October 2026</option>
-            <option value="sep_2026">September 2026</option>
-            <option value="last_90_days">Last 90 Days</option>
+            <option value="all">{isHi ? 'Pura Time (6 Mahine)' : 'All Time (6 Months)'}</option>
+            <option value="oct_2026">{isHi ? 'October 2026' : 'October 2026'}</option>
+            <option value="sep_2026">{isHi ? 'September 2026' : 'September 2026'}</option>
+            <option value="last_90_days">{isHi ? 'Aakhiri 90 Din' : 'Last 90 Days'}</option>
           </select>
 
           {(searchQuery || selectedCategory !== 'all' || selectedSupplier !== 'all' || periodFilter !== 'all') && (
@@ -333,7 +339,7 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
               onClick={handleResetFilters}
               className="px-3 py-2 text-xs font-medium text-[#B83E3E] hover:bg-[#FDF2F2] rounded-xl border border-[#F5C2C2] transition-colors cursor-pointer"
             >
-              Reset
+              {isHi ? 'Filter Hatayein' : 'Reset'}
             </button>
           )}
         </div>
@@ -373,13 +379,13 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
                     }}
                   >
                     <div className="flex items-center gap-1.5">
-                      <span>Date</span>
+                      <span>{t('ledger_col_date')}</span>
                       <ArrowUpDown className="w-3 h-3 text-[#64756A]" />
                     </div>
                   </th>
-                  <th className="py-3 px-4 font-semibold">Supplier & Invoice</th>
-                  <th className="py-3 px-4 font-semibold">Purchased Items</th>
-                  <th className="py-3 px-4 font-semibold">Category</th>
+                  <th className="py-3 px-4 font-semibold">{t('ledger_col_merchant')}</th>
+                  <th className="py-3 px-4 font-semibold">{t('ledger_col_items')}</th>
+                  <th className="py-3 px-4 font-semibold">{t('ledger_col_category')}</th>
                   <th
                     className="py-3 px-4 font-semibold text-right cursor-pointer select-none"
                     onClick={() => {
@@ -391,12 +397,12 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
                     }}
                   >
                     <div className="flex items-center justify-end gap-1.5">
-                      <span>Total Amount</span>
+                      <span>{t('ledger_col_total')}</span>
                       <ArrowUpDown className="w-3 h-3 text-[#64756A]" />
                     </div>
                   </th>
-                  <th className="py-3 px-4 font-semibold text-center">Status</th>
-                  <th className="py-3 px-4 font-semibold text-right">Actions</th>
+                  <th className="py-3 px-4 font-semibold text-center">{t('ledger_col_status')}</th>
+                  <th className="py-3 px-4 font-semibold text-right">{t('ledger_col_actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E2E7E2]">
@@ -405,7 +411,7 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
                   const itemsSummary =
                     rec.items.length === 1
                       ? rec.items[0].productName
-                      : `${rec.items[0]?.productName || 'Items'} +${rec.items.length - 1} more`;
+                      : `${rec.items[0]?.productName || 'Items'} +${rec.items.length - 1} ${isHi ? 'aur' : 'more'}`;
 
                   return (
                     <tr key={rec.id} className="hover:bg-[#FAFBF9] transition-colors">
@@ -424,7 +430,7 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
                         {itemsSummary}
                       </td>
                       <td className="py-3 px-4 whitespace-nowrap">
-                        <span className="text-[#64756A] text-[11px]">{firstCategory}</span>
+                        <span className="text-[#64756A] text-[11px]">{tCategory(firstCategory)}</span>
                       </td>
                       <td className="py-3 px-4 text-right whitespace-nowrap">
                         <CurrencyDisplay
@@ -439,7 +445,7 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
                           }`}
                         >
                           <CheckCircle2 className="w-3 h-3" />
-                          <span>Confirmed</span>
+                          <span>{rec.status === 'confirmed' ? t('ledger_status_confirmed') : t('ledger_status_draft')}</span>
                         </span>
                       </td>
                       <td className="py-3 px-4 text-right whitespace-nowrap">
@@ -506,7 +512,7 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
                 <div className="pt-2 border-t border-[#E2E7E2] flex items-center justify-between">
                   <span className="text-[11px] text-[#2E7D4F] flex items-center gap-1 font-medium">
                     <CheckCircle2 className="w-3 h-3" />
-                    <span>Confirmed</span>
+                    <span>{rec.status === 'confirmed' ? t('ledger_status_confirmed') : t('ledger_status_draft')}</span>
                   </span>
 
                   <div className="flex items-center gap-2">
@@ -514,13 +520,13 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
                       onClick={() => setViewingReceipt(rec)}
                       className="px-2.5 py-1 text-xs font-medium text-[#476C58] bg-[#F7F8F5] border border-[#E2E7E2] rounded-lg"
                     >
-                      Details
+                      {isHi ? 'Pura Bill' : 'Details'}
                     </button>
                     <button
                       onClick={() => setEditingReceipt(JSON.parse(JSON.stringify(rec)))}
                       className="px-2.5 py-1 text-xs font-medium text-[#64756A] bg-[#F7F8F5] border border-[#E2E7E2] rounded-lg"
                     >
-                      Edit
+                      {isHi ? 'Badlein' : 'Edit'}
                     </button>
                     <button
                       onClick={() => setDeletingId(rec.id)}

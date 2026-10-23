@@ -103,11 +103,11 @@ export async function getSavingsOpportunities(): Promise<SavingsOpportunity[]> {
 
 export const getOpportunities = getSavingsOpportunities;
 
-export async function askAssistant(message: string): Promise<AssistantChatMessage> {
+export async function askAssistant(message: string, language: 'en' | 'hi' = 'en'): Promise<AssistantChatMessage> {
   const res = await fetch('/api/assistant/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, language }),
   });
   const json = await res.json();
   if (!json.success) throw new Error(json.error || 'Assistant failed to answer');

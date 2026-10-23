@@ -1,8 +1,3 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import React from 'react';
 import {
   LayoutDashboard,
@@ -11,6 +6,7 @@ import {
   TrendingDown,
   Sparkles,
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext.tsx';
 
 interface BottomNavProps {
   currentRoute: string;
@@ -18,6 +14,8 @@ interface BottomNavProps {
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({ currentRoute, onRouteChange }) => {
+  const { t } = useLanguage();
+
   return (
     <nav
       className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#FFFFFF] border-t border-[#E2E7E2] px-2 py-1.5 pb-safe shadow-lg"
@@ -27,7 +25,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentRoute, onRouteChang
         {/* 1. Home */}
         <button
           onClick={() => onRouteChange('/')}
-          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer min-w-[56px] min-h-[48px] ${
+          className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-xs font-medium transition-colors cursor-pointer min-w-[56px] min-h-[48px] ${
             currentRoute === '/'
               ? 'text-[#476C58]'
               : 'text-[#64756A] hover:text-[#25382D]'
@@ -36,13 +34,13 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentRoute, onRouteChang
           aria-current={currentRoute === '/' ? 'page' : undefined}
         >
           <LayoutDashboard className={`w-5 h-5 mb-0.5 ${currentRoute === '/' ? 'stroke-[2.5]' : ''}`} />
-          <span className="text-[11px]">Home</span>
+          <span className="text-[11px] truncate max-w-[70px]">{t('nav_home')}</span>
         </button>
 
         {/* 2. Ledger */}
         <button
           onClick={() => onRouteChange('/ledger')}
-          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer min-w-[56px] min-h-[48px] ${
+          className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-xs font-medium transition-colors cursor-pointer min-w-[56px] min-h-[48px] ${
             currentRoute === '/ledger'
               ? 'text-[#476C58]'
               : 'text-[#64756A] hover:text-[#25382D]'
@@ -51,7 +49,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentRoute, onRouteChang
           aria-current={currentRoute === '/ledger' ? 'page' : undefined}
         >
           <ReceiptText className={`w-5 h-5 mb-0.5 ${currentRoute === '/ledger' ? 'stroke-[2.5]' : ''}`} />
-          <span className="text-[11px]">Ledger</span>
+          <span className="text-[11px] truncate max-w-[70px]">{t('nav_ledger')}</span>
         </button>
 
         {/* 3. Central Scan Action */}
@@ -71,18 +69,18 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentRoute, onRouteChang
             <ScanLine className="w-6 h-6 stroke-[2.2]" />
           </div>
           <span
-            className={`text-[11px] mt-1 font-semibold ${
+            className={`text-[11px] mt-1 font-semibold truncate max-w-[70px] ${
               currentRoute === '/scan' ? 'text-[#25382D]' : 'text-[#476C58]'
             }`}
           >
-            Scan
+            {t('nav_scan')}
           </span>
         </button>
 
         {/* 4. Save More */}
         <button
           onClick={() => onRouteChange('/save-more')}
-          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer min-w-[56px] min-h-[48px] ${
+          className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-xs font-medium transition-colors cursor-pointer min-w-[56px] min-h-[48px] ${
             currentRoute === '/save-more'
               ? 'text-[#476C58]'
               : 'text-[#64756A] hover:text-[#25382D]'
@@ -91,13 +89,13 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentRoute, onRouteChang
           aria-current={currentRoute === '/save-more' ? 'page' : undefined}
         >
           <TrendingDown className={`w-5 h-5 mb-0.5 ${currentRoute === '/save-more' ? 'stroke-[2.5]' : ''}`} />
-          <span className="text-[11px]">Save More</span>
+          <span className="text-[11px] truncate max-w-[70px]">{t('nav_save_more')}</span>
         </button>
 
         {/* 5. Ask Assistant */}
         <button
           onClick={() => onRouteChange('/ask')}
-          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer min-w-[56px] min-h-[48px] ${
+          className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-xs font-medium transition-colors cursor-pointer min-w-[56px] min-h-[48px] ${
             currentRoute === '/ask'
               ? 'text-[#476C58]'
               : 'text-[#64756A] hover:text-[#25382D]'
@@ -106,7 +104,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentRoute, onRouteChang
           aria-current={currentRoute === '/ask' ? 'page' : undefined}
         >
           <Sparkles className={`w-5 h-5 mb-0.5 ${currentRoute === '/ask' ? 'stroke-[2.5]' : ''}`} />
-          <span className="text-[11px]">Ask</span>
+          <span className="text-[11px] truncate max-w-[70px]">{t('nav_ask')}</span>
         </button>
       </div>
     </nav>

@@ -1,11 +1,7 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import React from 'react';
 import { BrandLogo } from './BrandLogo.tsx';
 import { Business } from '../types/index.ts';
+import { useLanguage } from '../context/LanguageContext.tsx';
 import {
   LayoutDashboard,
   ScanLine,
@@ -31,12 +27,14 @@ export const Navbar: React.FC<NavbarProps> = ({
   onResetDemo,
   isResetting = false,
 }) => {
+  const { language, setLanguage, t } = useLanguage();
+
   const navItems = [
-    { id: '/', label: 'Home', icon: LayoutDashboard },
-    { id: '/scan', label: 'Scan', icon: ScanLine },
-    { id: '/ledger', label: 'Ledger', icon: ReceiptText },
-    { id: '/save-more', label: 'Save More', icon: TrendingDown },
-    { id: '/ask', label: 'Ask', icon: Sparkles },
+    { id: '/', label: t('nav_home'), icon: LayoutDashboard },
+    { id: '/scan', label: t('nav_scan'), icon: ScanLine },
+    { id: '/ledger', label: t('nav_ledger'), icon: ReceiptText },
+    { id: '/save-more', label: t('nav_save_more'), icon: TrendingDown },
+    { id: '/ask', label: t('nav_ask'), icon: Sparkles },
   ];
 
   return (
@@ -75,16 +73,50 @@ export const Navbar: React.FC<NavbarProps> = ({
             })}
           </nav>
 
-          {/* Business & Demo Environment State */}
+          {/* Business & Demo Environment State + Language Toggle */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-[#F7F8F5] border border-[#E2E7E2] text-xs">
+            {/* Top-Right English / Hinglish Toggle */}
+            <div
+              className="flex items-center p-0.5 rounded-lg border border-[#E2E7E2] bg-[#F7F8F5] text-xs font-medium"
+              role="group"
+              aria-label="Language selection"
+            >
+              <button
+                type="button"
+                onClick={() => setLanguage('en')}
+                className={`px-2.5 py-1 rounded-md text-xs transition-colors cursor-pointer whitespace-nowrap ${
+                  language === 'en'
+                    ? 'bg-[#FFFFFF] text-[#25382D] shadow-xs font-semibold'
+                    : 'text-[#64756A] hover:text-[#25382D]'
+                }`}
+                aria-pressed={language === 'en'}
+                title="Switch to English"
+              >
+                English
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('hi')}
+                className={`px-2.5 py-1 rounded-md text-xs transition-colors cursor-pointer whitespace-nowrap ${
+                  language === 'hi'
+                    ? 'bg-[#FFFFFF] text-[#25382D] shadow-xs font-semibold'
+                    : 'text-[#64756A] hover:text-[#25382D]'
+                }`}
+                aria-pressed={language === 'hi'}
+                title="Switch to Hinglish"
+              >
+                Hinglish
+              </button>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-[#F7F8F5] border border-[#E2E7E2] text-xs">
               <Building2 className="w-3.5 h-3.5 text-[#476C58] shrink-0" />
               <div className="flex flex-col">
-                <span className="font-medium text-[#25382D] truncate max-w-[100px] sm:max-w-[140px] text-[11px] sm:text-xs">
+                <span className="font-medium text-[#25382D] truncate max-w-[100px] sm:max-w-[130px] text-[11px] sm:text-xs">
                   {business?.name || 'Green Basket Stores'}
                 </span>
                 <span className="text-[9px] sm:text-[10px] text-[#64756A] truncate">
-                  {business?.isDemo ? 'Demo (INR)' : 'Live'}
+                  {business?.isDemo ? t('demo_badge') : t('live_badge')}
                 </span>
               </div>
             </div>
@@ -97,7 +129,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               aria-label="Reset demo data"
             >
               <RotateCcw className={`w-3.5 h-3.5 ${isResetting ? 'animate-spin' : ''}`} />
-              <span className="hidden lg:inline">{isResetting ? 'Resetting...' : 'Reset Demo'}</span>
+              <span className="hidden xl:inline">{isResetting ? t('resetting') : t('reset_demo')}</span>
             </button>
           </div>
         </div>

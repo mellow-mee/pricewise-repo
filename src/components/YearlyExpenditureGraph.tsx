@@ -18,6 +18,7 @@ import {
   Cell,
 } from 'recharts';
 import { BarChart3, Calendar, TrendingUp, Info } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext.tsx';
 
 interface YearlyExpenditureGraphProps {
   receipts: Receipt[];
@@ -36,6 +37,9 @@ export const YearlyExpenditureGraph: React.FC<YearlyExpenditureGraphProps> = ({
   onMonthSelect,
   availableYears = [2026, 2025, 2024],
 }) => {
+  const { language } = useLanguage();
+  const isHi = language === 'hi';
+
   const yearlyData = useMemo(() => {
     return generateYearlyExpenditureSeries(receipts, selectedYear);
   }, [receipts, selectedYear]);
@@ -74,11 +78,13 @@ export const YearlyExpenditureGraph: React.FC<YearlyExpenditureGraphProps> = ({
           <div className="flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-[#476C58]" />
             <h2 className="text-lg font-bold text-[#25382D]">
-              Yearly Expenditure Graph ({selectedYear})
+              {isHi ? `Salana Kharcha Graph (${selectedYear})` : `Yearly Expenditure Graph (${selectedYear})`}
             </h2>
           </div>
           <p className="text-xs text-[#64756A] mt-0.5">
-            Total store expenditure broken down month-by-month for {selectedYear}.
+            {isHi
+              ? `${selectedYear} me har mahine dukan ke kul kharche ka aalokan.`
+              : `Total store expenditure broken down month-by-month for ${selectedYear}.`}
           </p>
         </div>
 
@@ -86,7 +92,7 @@ export const YearlyExpenditureGraph: React.FC<YearlyExpenditureGraphProps> = ({
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <span className="text-xs text-[#64756A] font-medium flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5" />
-            <span>Select Year:</span>
+            <span>{isHi ? 'Saal Chunein:' : 'Select Year:'}</span>
           </span>
           <select
             value={selectedYear}
@@ -106,7 +112,9 @@ export const YearlyExpenditureGraph: React.FC<YearlyExpenditureGraphProps> = ({
       {/* 2. Key Metrics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#F7F8F5] p-3 rounded-xl border border-[#E2E7E2] text-xs">
         <div>
-          <span className="text-[11px] text-[#64756A] block">Total {selectedYear} Spend</span>
+          <span className="text-[11px] text-[#64756A] block">
+            {isHi ? `Kul ${selectedYear} Kharcha` : `Total ${selectedYear} Spend`}
+          </span>
           <CurrencyDisplay
             amountMinor={yearlyData.totalYearSpendMinor}
             className="text-base sm:text-lg font-bold text-[#25382D] mt-0.5 block"
@@ -114,7 +122,9 @@ export const YearlyExpenditureGraph: React.FC<YearlyExpenditureGraphProps> = ({
         </div>
 
         <div>
-          <span className="text-[11px] text-[#64756A] block">Monthly Average</span>
+          <span className="text-[11px] text-[#64756A] block">
+            {isHi ? 'Ausat Mahina Kharcha' : 'Monthly Average'}
+          </span>
           <CurrencyDisplay
             amountMinor={yearlyData.averageMonthlySpendMinor}
             className="text-base sm:text-lg font-bold text-[#476C58] mt-0.5 block"
@@ -122,16 +132,20 @@ export const YearlyExpenditureGraph: React.FC<YearlyExpenditureGraphProps> = ({
         </div>
 
         <div>
-          <span className="text-[11px] text-[#64756A] block">Peak Spending Month</span>
+          <span className="text-[11px] text-[#64756A] block">
+            {isHi ? 'Sabse Zyada Kharcha Mahina' : 'Peak Spending Month'}
+          </span>
           <span className="text-xs sm:text-sm font-bold text-[#25382D] mt-0.5 block truncate">
-            {peakMonth ? `${peakMonth.shortMonth} (${formatINR(peakMonth.totalSpendMinor)})` : 'None'}
+            {peakMonth ? `${peakMonth.shortMonth} (${formatINR(peakMonth.totalSpendMinor)})` : (isHi ? 'Koi nahi' : 'None')}
           </span>
         </div>
 
         <div>
-          <span className="text-[11px] text-[#64756A] block">Active Months</span>
+          <span className="text-[11px] text-[#64756A] block">
+            {isHi ? 'Active Mahine' : 'Active Months'}
+          </span>
           <span className="text-xs sm:text-sm font-bold text-[#25382D] font-mono mt-0.5 block">
-            {yearlyData.activeMonthsCount} / 12 months
+            {yearlyData.activeMonthsCount} / 12 {isHi ? 'mahine' : 'months'}
           </span>
         </div>
       </div>
@@ -179,25 +193,25 @@ export const YearlyExpenditureGraph: React.FC<YearlyExpenditureGraphProps> = ({
                         </span>
                         {data.isSelected && (
                           <span className="text-[10px] bg-[#DCE7DD] text-[#476C58] font-semibold px-1.5 py-0.5 rounded">
-                            Active in Table
+                            {isHi ? 'Table me active' : 'Active in Table'}
                           </span>
                         )}
                       </div>
                       <div className="flex items-center justify-between gap-4">
-                        <span className="text-[#64756A]">Total Spend:</span>
+                        <span className="text-[#64756A]">{isHi ? 'Kul Kharcha:' : 'Total Spend:'}</span>
                         <span className="font-mono font-bold text-[#25382D]">
                           {formatINR(data.totalSpendMinor)}
                         </span>
                       </div>
                       <div className="flex items-center justify-between gap-4 text-[#64756A]">
-                        <span>Invoices / Bills:</span>
+                        <span>{isHi ? 'Billein / Invoices:' : 'Invoices / Bills:'}</span>
                         <span className="font-mono font-medium">
-                          {data.receiptCount} {data.receiptCount === 1 ? 'bill' : 'bills'}
+                          {data.receiptCount} {isHi ? 'billein' : data.receiptCount === 1 ? 'bill' : 'bills'}
                         </span>
                       </div>
                       {onMonthSelect && (
                         <p className="text-[10px] text-[#476C58] font-medium pt-1 border-t border-[#E2E7E2] text-center">
-                          Click bar to open in monthly spreadsheet ↓
+                          {isHi ? 'Neeche spreadsheet kholne ke liye click karein ↓' : 'Click bar to open in monthly spreadsheet ↓'}
                         </p>
                       )}
                     </div>
@@ -240,16 +254,20 @@ export const YearlyExpenditureGraph: React.FC<YearlyExpenditureGraphProps> = ({
         <div className="flex items-center gap-2">
           <span className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-xs bg-[#25382D]" />
-            <span>Active month in spreadsheet</span>
+            <span>{isHi ? 'Spreadsheet me chuna hua mahina' : 'Active month in spreadsheet'}</span>
           </span>
           <span className="flex items-center gap-1.5 ml-2">
             <span className="w-2.5 h-2.5 rounded-xs bg-[#476C58]" />
-            <span>Recorded spending</span>
+            <span>{isHi ? 'Darj kharcha' : 'Recorded spending'}</span>
           </span>
         </div>
         <div className="flex items-center gap-1 text-[#64756A]">
           <Info className="w-3.5 h-3.5 text-[#476C58] shrink-0" />
-          <span>Tip: Click any month column above to switch the spreadsheet view below.</span>
+          <span>
+            {isHi
+              ? 'Sujhav: Kisi bhi mahine ke column par click karke neeche spreadsheet dekhein.'
+              : 'Tip: Click any month column above to switch the spreadsheet view below.'}
+          </span>
         </div>
       </div>
     </div>

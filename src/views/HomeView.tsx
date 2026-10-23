@@ -1,8 +1,3 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import React, { useMemo } from 'react';
 import {
   Business,
@@ -14,6 +9,7 @@ import {
   formatINR,
 } from '../utils/finance.ts';
 import { CurrencyDisplay } from '../components/CurrencyDisplay.tsx';
+import { useLanguage } from '../context/LanguageContext.tsx';
 import {
   ArrowRight,
   TrendingDown,
@@ -36,15 +32,23 @@ export const HomeView: React.FC<HomeViewProps> = ({
   opportunities,
   onNavigate,
 }) => {
+  const { language, t } = useLanguage();
+  const isHi = language === 'hi';
+
   // Time-appropriate greeting
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
+    if (isHi) {
+      if (hour < 12) return 'Shubh Prabhat';
+      if (hour < 17) return 'Shubh Dopahar';
+      return 'Shubh Sandhya';
+    }
     if (hour < 12) return 'Good morning';
     if (hour < 17) return 'Good afternoon';
     return 'Good evening';
-  }, []);
+  }, [isHi]);
 
-  const ownerName = business?.ownerName || 'Store Owner';
+  const ownerName = business?.ownerName || (isHi ? 'Dukaandar' : 'Store Owner');
   const businessName = business?.name || 'Green Basket Stores';
 
   // Derived spending summary
@@ -53,6 +57,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   }, [receipts, opportunities]);
 
   // Priority insights written in simple, layman-friendly language
+  // Priority insights written in simple, business-friendly language
   const insights = useMemo(() => {
     const list = [];
     const meaningfulOpps = opportunities.filter((o) => o.state === 'meaningful_opportunity');
@@ -62,9 +67,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
       list.push({
         id: 'opp-top',
         type: 'opportunity',
-        title: `${topOpp.productName} — Possible Savings`,
-        description: `You pay ${formatINR(topOpp.currentRecordedPriceMinor)} per ${topOpp.unit}, while nearby stores pay about ${formatINR(topOpp.benchmarkMedianPriceMinor)}. You could save around ${formatINR(topOpp.estimatedPotentialSavingsMinor)}.`,
-        actionLabel: 'Compare Prices',
+        title: isHi
+          ? `${topOpp.productName} — Bachat ka Mauka`
+          : `${topOpp.productName} — Possible Savings`,
+        description: isHi
+          ? `Aap per ${topOpp.unit} ${formatINR(topOpp.currentRecordedPriceMinor)} chuka rahe hain, jabki bazaar ka median rate lagbhag ${formatINR(topOpp.benchmarkMedianPriceMinor)} hai. Aap lagbhag ${formatINR(topOpp.estimatedPotentialSavingsMinor)} bacha sakte hain.`
+          : `You pay ${formatINR(topOpp.currentRecordedPriceMinor)} per ${topOpp.unit}, while nearby stores pay about ${formatINR(topOpp.benchmarkMedianPriceMinor)}. You could save around ${formatINR(topOpp.estimatedPotentialSavingsMinor)}.`,
+        actionLabel: isHi ? 'Rates Compare Karein' : 'Compare Prices',
         route: '/save-more',
       });
     }
@@ -74,9 +83,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
       list.push({
         id: 'mom-trend',
         type: isUp ? 'alert' : 'positive',
-        title: `Spending ${isUp ? 'went up' : 'went down'} by ${Math.abs(summary.monthOverMonthChangePercentage)}%`,
-        description: `You spent ${formatINR(summary.currentMonthSpendingMinor)} this month compared to ${formatINR(summary.previousMonthSpendingMinor)} last month.`,
-        actionLabel: 'View in Ledger',
+        title: isHi
+          ? `Kharcha ${isUp ? 'badha' : 'ghata'} ${Math.abs(summary.monthOverMonthChangePercentage)}% se`
+          : `Spending ${isUp ? 'went up' : 'went down'} by ${Math.abs(summary.monthOverMonthChangePercentage)}%`,
+        description: isHi
+          ? `Is mahine aapka kharcha ${formatINR(summary.currentMonthSpendingMinor)} raha, pichhle mahine ${formatINR(summary.previousMonthSpendingMinor)} ke mukable.`
+          : `You spent ${formatINR(summary.currentMonthSpendingMinor)} this month compared to ${formatINR(summary.previousMonthSpendingMinor)} last month.`,
+        actionLabel: isHi ? 'Khate Mein Dekhein' : 'View in Ledger',
         route: '/ledger',
       });
     }
@@ -86,15 +99,19 @@ export const HomeView: React.FC<HomeViewProps> = ({
       list.push({
         id: 'competitive-tea',
         type: 'positive',
-        title: `${competitive.productName} has good pricing`,
-        description: `Your purchase price is at or below the local market average (${formatINR(competitive.benchmarkMedianPriceMinor)}). Keep it up!`,
-        actionLabel: 'Check Price',
+        title: isHi
+          ? `${competitive.productName} ke rates bilkul sahi hain`
+          : `${competitive.productName} has good pricing`,
+        description: isHi
+          ? `Aapka khareed rate local wholesale market ke average (${formatINR(competitive.benchmarkMedianPriceMinor)}) ke barabar ya kam hai.`
+          : `Your purchase price is at or below the local market average (${formatINR(competitive.benchmarkMedianPriceMinor)}). Keep it up!`,
+        actionLabel: isHi ? 'Rate Check Karein' : 'Check Price',
         route: '/save-more',
       });
     }
 
     return list.slice(0, 3);
-  }, [opportunities, summary]);
+  }, [opportunities, summary, isHi]);
 
   // Recent 5 receipts
   const recentReceipts = useMemo(() => {
@@ -103,14 +120,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
   return (
     <div className="space-y-6 pb-20 md:pb-12">
-      {/* 1. Header Greeting (Without Upload New Receipt button) */}
+      {/* 1. Header Greeting */}
       <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#25382D]">
             {greeting}, {ownerName}
           </h1>
           <p className="text-sm text-[#64756A] mt-0.5">
-            {businessName} · Here is how your store spending looks this month.
+            {businessName} · {isHi ? 'Is mahine aapki dukaan ke kharche aur bachat ka pura hisaab-kitab:' : 'Here is how your store spending looks this month.'}
           </p>
         </div>
       </section>
@@ -120,7 +137,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
           <div className="space-y-4 max-w-xl">
             <span className="text-xs font-semibold uppercase tracking-wider text-[#64756A]">
-              This Month's Spending · October 2026
+              {isHi ? 'Is Mahine Ka Kharcha · October 2026' : "This Month's Spending · October 2026"}
             </span>
 
             <div className="flex items-baseline gap-3 flex-wrap">
@@ -128,24 +145,30 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 amountMinor={summary.currentMonthSpendingMinor}
                 className="text-3xl sm:text-4xl font-bold text-[#25382D] tracking-tight"
               />
-              <span className="text-xs text-[#64756A]">spent on store supplies & bills</span>
+              <span className="text-xs text-[#64756A]">
+                {isHi ? 'dukaan saman aur vendor payments par kharch' : 'spent on store supplies & bills'}
+              </span>
             </div>
 
             {summary.hasEnoughBenchmarkData && summary.benchmarkSpendingMinor !== null ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2 border-t border-[#E2E7E2]">
                 <div className="bg-[#F7F8F5] rounded-xl p-3.5 border border-[#E2E7E2]">
-                  <span className="text-xs text-[#64756A] block">Market Average (Similar Stores)</span>
+                  <span className="text-xs text-[#64756A] block">
+                    {isHi ? 'Regional Bazaar Thok Bhaav' : 'Market Average (Similar Stores)'}
+                  </span>
                   <CurrencyDisplay
                     amountMinor={summary.benchmarkSpendingMinor}
                     className="text-xl font-bold text-[#25382D] mt-0.5 block"
                   />
                   <span className="text-[11px] text-[#64756A] mt-1 block">
-                    Based on 5+ local stores in your area
+                    {isHi ? 'Area ki 5+ dukaano ke verified data par aadharit' : 'Based on 5+ local stores in your area'}
                   </span>
                 </div>
 
                 <div className="bg-[#EDF7F1] rounded-xl p-3.5 border border-[#CDE8D8]">
-                  <span className="text-xs text-[#2E7D4F] font-medium block">Estimated Possible Savings</span>
+                  <span className="text-xs text-[#2E7D4F] font-medium block">
+                    {isHi ? 'Sambhavit Kul Bachat' : 'Estimated Possible Savings'}
+                  </span>
                   <div className="flex items-baseline gap-2 mt-0.5">
                     <CurrencyDisplay
                       amountMinor={summary.potentialDifferenceMinor || 0}
@@ -158,48 +181,56 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     )}
                   </div>
                   <span className="text-[11px] text-[#2E7D4F] mt-1 block">
-                    Potential savings, not guaranteed
+                    {isHi ? 'Anumanit bachat, rate negotiation par nirbhar' : 'Potential savings, not guaranteed'}
                   </span>
                 </div>
               </div>
             ) : (
               <div className="bg-[#FDF8F0] border border-[#F3E2CE] rounded-xl p-3.5 text-xs text-[#C0772C]">
-                <span className="font-semibold block mb-0.5">Not enough store data yet</span>
-                Pricewise needs data from at least 5 local stores before comparing prices.
+                <span className="font-semibold block mb-0.5">
+                  {isHi ? 'Abhi peer data kam hai' : 'Not enough store data yet'}
+                </span>
+                {isHi
+                  ? 'Bhaav compare karne ke liye Pricewise ko kam se kam 5 dukaano ka verified data chahiye.'
+                  : 'Pricewise needs data from at least 5 local stores before comparing prices.'}
               </div>
             )}
 
             <p className="text-xs text-[#64756A] leading-relaxed">
               {summary.potentialDifferenceMinor && summary.potentialDifferenceMinor > 0
-                ? `You could potentially save ${formatINR(summary.potentialDifferenceMinor)} (${summary.differencePercentage}%) by matching local market prices on packaging and supplies.`
-                : 'Your current purchase prices are close to the local market average.'}
+                ? isHi
+                  ? `Packaging aur store supplies par local market median rates match karke aap lagbhag ${formatINR(summary.potentialDifferenceMinor)} (${summary.differencePercentage}%) tak bacha sakte hain.`
+                  : `You could potentially save ${formatINR(summary.potentialDifferenceMinor)} (${summary.differencePercentage}%) by matching local market prices on packaging and supplies.`
+                : isHi
+                  ? 'Aapke khareed rates local bazaar ke median average ke bilkul barabar hain.'
+                  : 'Your current purchase prices are close to the local market average.'}
             </p>
           </div>
 
           {/* Quick Action Box */}
           <div className="lg:w-72 bg-[#F7F8F5] rounded-xl p-4 border border-[#E2E7E2] space-y-3 shrink-0">
             <span className="text-xs font-semibold text-[#25382D] block">
-              Store Status
+              {isHi ? 'Dukaan Khata Status' : 'Store Status'}
             </span>
             <ul className="text-xs text-[#64756A] space-y-2">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#2E7D4F] shrink-0" />
-                <span>6 months of purchase records</span>
+                <span>{isHi ? '6 mahine ka kharcha record active' : '6 months of purchase records'}</span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#2E7D4F] shrink-0" />
-                <span>{receipts.length} bills and receipts saved</span>
+                <span>{receipts.length} {isHi ? 'verified bills darj hain' : 'bills and receipts saved'}</span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#2E7D4F] shrink-0" />
-                <span>Community price sharing on</span>
+                <span>{isHi ? 'Collective thok bhaav network chalu' : 'Community price sharing on'}</span>
               </li>
             </ul>
             <button
               onClick={() => onNavigate('/save-more')}
               className="w-full mt-2 inline-flex items-center justify-between px-3 py-2 rounded-lg bg-[#FFFFFF] border border-[#E2E7E2] text-xs font-medium text-[#25382D] hover:bg-[#DCE7DD] transition-colors cursor-pointer"
             >
-              <span>See Market Prices</span>
+              <span>{isHi ? 'Bachat Bhaav Dekhein' : 'See Market Prices'}</span>
               <ArrowRight className="w-3.5 h-3.5 text-[#476C58]" />
             </button>
           </div>
@@ -209,8 +240,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
       {/* 3. Priority Insights */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-[#25382D]">Helpful Spending Insights</h2>
-          <span className="text-xs text-[#64756A]">Based on your saved bills</span>
+          <h2 className="text-lg font-bold text-[#25382D]">
+            {isHi ? 'Zaroori Kharcha & Bachat Sujhav' : 'Helpful Spending Insights'}
+          </h2>
+          <span className="text-xs text-[#64756A]">
+            {isHi ? 'Aapke verified bills ke mutabiq' : 'Based on your saved bills'}
+          </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -249,14 +284,18 @@ export const HomeView: React.FC<HomeViewProps> = ({
       <section className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-5 sm:p-7 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-[#25382D]">Recent Bills & Invoices</h2>
-            <p className="text-xs text-[#64756A]">Latest purchases added to your ledger</p>
+            <h2 className="text-lg font-bold text-[#25382D]">
+              {isHi ? 'Haal hi ke Bills & Invoices' : 'Recent Bills & Invoices'}
+            </h2>
+            <p className="text-xs text-[#64756A]">
+              {isHi ? 'Khate mein darj aakhiri purchases' : 'Latest purchases added to your ledger'}
+            </p>
           </div>
           <button
             onClick={() => onNavigate('/ledger')}
             className="text-xs font-semibold text-[#476C58] hover:text-[#25382D] flex items-center gap-1 cursor-pointer"
           >
-            <span>View all bills</span>
+            <span>{isHi ? 'Saare bills dekhein' : 'View all bills'}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -279,7 +318,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   <div className="flex items-center gap-2 text-xs text-[#64756A]">
                     <span>{rec.transactionDate}</span>
                     <span>·</span>
-                    <span>{rec.items.length} line {rec.items.length === 1 ? 'item' : 'items'}</span>
+                    <span>
+                      {rec.items.length} {isHi ? 'items' : rec.items.length === 1 ? 'item' : 'items'}
+                    </span>
                     {rec.invoiceNumber && (
                       <>
                         <span>·</span>
@@ -296,7 +337,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   className="text-sm font-bold text-[#25382D] block"
                 />
                 <span className="text-[11px] text-[#2E7D4F] font-medium">
-                  {rec.status === 'confirmed' ? 'Confirmed' : 'Needs Review'}
+                  {rec.status === 'confirmed'
+                    ? isHi ? 'Verified Bill' : 'Confirmed'
+                    : isHi ? 'Check Karein' : 'Needs Review'}
                 </span>
               </div>
             </div>

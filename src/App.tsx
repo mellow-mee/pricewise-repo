@@ -25,6 +25,7 @@ import {
   resetDemoDatabase,
 } from './services/api.ts';
 import { RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
+import { LanguageProvider } from './context/LanguageContext.tsx';
 
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState<string>(() => {
@@ -153,69 +154,71 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F8F5] text-[#25382D] flex flex-col font-sans">
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed top-18 right-4 z-50 bg-[#FFFFFF] border border-[#E2E7E2] px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2.5 text-xs animate-in fade-in slide-in-from-top-2">
-          {toastMessage.type === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 text-[#2E7D4F] shrink-0" />
-          ) : (
-            <AlertCircle className="w-4 h-4 text-[#476C58] shrink-0" />
+    <LanguageProvider>
+      <div className="min-h-screen bg-[#F7F8F5] text-[#25382D] flex flex-col font-sans">
+        {/* Toast Notification */}
+        {toastMessage && (
+          <div className="fixed top-18 right-4 z-50 bg-[#FFFFFF] border border-[#E2E7E2] px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2.5 text-xs animate-in fade-in slide-in-from-top-2">
+            {toastMessage.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-[#2E7D4F] shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-[#476C58] shrink-0" />
+            )}
+            <span className="font-medium text-[#25382D]">{toastMessage.text}</span>
+          </div>
+        )}
+
+        {/* Top Navbar (Desktop & Tablet) */}
+        <Navbar
+          currentRoute={currentRoute}
+          onRouteChange={navigateTo}
+          business={business}
+          onResetDemo={handleResetDemo}
+          isResetting={isResetting}
+        />
+
+        {/* Main Page Content */}
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+          {currentRoute === '/' && (
+            <HomeView
+              business={business}
+              receipts={receipts}
+              opportunities={opportunities}
+              onNavigate={navigateTo}
+            />
           )}
-          <span className="font-medium text-[#25382D]">{toastMessage.text}</span>
-        </div>
-      )}
 
-      {/* Top Navbar (Desktop & Tablet) */}
-      <Navbar
-        currentRoute={currentRoute}
-        onRouteChange={navigateTo}
-        business={business}
-        onResetDemo={handleResetDemo}
-        isResetting={isResetting}
-      />
+          {currentRoute === '/scan' && (
+            <ScanView onSaved={handleReceiptSaved} onNavigate={navigateTo} />
+          )}
 
-      {/* Main Page Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        {currentRoute === '/' && (
-          <HomeView
-            business={business}
-            receipts={receipts}
-            opportunities={opportunities}
-            onNavigate={navigateTo}
-          />
-        )}
+          {currentRoute === '/ledger' && (
+            <LedgerView
+              receipts={receipts}
+              onReceiptUpdated={handleReceiptUpdated}
+              onReceiptDeleted={handleReceiptDeleted}
+              onNavigate={navigateTo}
+            />
+          )}
 
-        {currentRoute === '/scan' && (
-          <ScanView onSaved={handleReceiptSaved} onNavigate={navigateTo} />
-        )}
+          {currentRoute === '/save-more' && (
+            <SaveMoreView
+              business={business}
+              opportunities={opportunities}
+              benchmarks={benchmarks}
+              onConsentUpdated={handleConsentUpdated}
+              onNavigate={navigateTo}
+            />
+          )}
 
-        {currentRoute === '/ledger' && (
-          <LedgerView
-            receipts={receipts}
-            onReceiptUpdated={handleReceiptUpdated}
-            onReceiptDeleted={handleReceiptDeleted}
-            onNavigate={navigateTo}
-          />
-        )}
+          {currentRoute === '/ask' && (
+            <AskView business={business} receipts={receipts} onNavigate={navigateTo} />
+          )}
+        </main>
 
-        {currentRoute === '/save-more' && (
-          <SaveMoreView
-            business={business}
-            opportunities={opportunities}
-            benchmarks={benchmarks}
-            onConsentUpdated={handleConsentUpdated}
-            onNavigate={navigateTo}
-          />
-        )}
-
-        {currentRoute === '/ask' && (
-          <AskView business={business} receipts={receipts} onNavigate={navigateTo} />
-        )}
-      </main>
-
-      {/* Bottom Navigation (Mobile Only) */}
-      <BottomNav currentRoute={currentRoute} onRouteChange={navigateTo} />
-    </div>
+        {/* Bottom Navigation (Mobile Only) */}
+        <BottomNav currentRoute={currentRoute} onRouteChange={navigateTo} />
+      </div>
+    </LanguageProvider>
   );
 }

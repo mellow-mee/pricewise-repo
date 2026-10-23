@@ -27,6 +27,7 @@ import {
   Layers,
 } from 'lucide-react';
 import { updateBusinessConsent } from '../services/api.ts';
+import { useLanguage } from '../context/LanguageContext.tsx';
 
 interface SaveMoreViewProps {
   business: Business | null;
@@ -43,6 +44,9 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
   onConsentUpdated,
   onNavigate,
 }) => {
+  const { language, t, tCategory } = useLanguage();
+  const isHi = language === 'hi';
+
   const [activeTab, setActiveTab] = useState<'all' | 'opportunities' | 'competitive' | 'insufficient'>('all');
   const [isUpdatingConsent, setIsUpdatingConsent] = useState(false);
   const [showMethodologyModal, setShowMethodologyModal] = useState(false);
@@ -101,11 +105,13 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#25382D]">
-              Collective Purchasing Intelligence
+              {isHi ? 'Samuhik Khareed Bhaav Benchmarks' : 'Collective Purchasing Intelligence'}
             </h1>
           </div>
           <p className="text-sm text-[#64756A] mt-0.5">
-            Anonymized price benchmarks derived from 5+ comparable regional businesses.
+            {isHi
+              ? '5+ aas-paas ke vyapariyon ke anonymized data par aadharit thok market rate.'
+              : 'Anonymized price benchmarks derived from 5+ comparable regional businesses.'}
           </p>
         </div>
 
@@ -114,7 +120,7 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
           className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[#E2E7E2] bg-[#FFFFFF] text-xs font-semibold text-[#25382D] hover:bg-[#F7F8F5] transition-colors cursor-pointer self-start sm:self-auto"
         >
           <Info className="w-3.5 h-3.5 text-[#476C58]" />
-          <span>Benchmark Methodology</span>
+          <span>{isHi ? 'Benchmark Vidhi' : 'Benchmark Methodology'}</span>
         </button>
       </div>
 
@@ -123,54 +129,57 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-[#476C58] shrink-0" />
           <span>
-            <strong className="text-[#25382D]">Demo Benchmark Environment:</strong> Peer medians are generated from realistic synthetic local retail records for testing and demonstration.
+            <strong className="text-[#25382D]">{isHi ? 'Demo Benchmark Vatavaran: ' : 'Demo Benchmark Environment: '}</strong>
+            {isHi
+              ? 'Regional comparison ke liye peer medians local retail records par aadharit hain.'
+              : 'Peer medians are generated from realistic synthetic local retail records for testing and demonstration.'}
           </span>
         </div>
         <span className="text-[11px] font-mono text-[#476C58] whitespace-nowrap bg-[#DCE7DD] px-2 py-0.5 rounded-md">
-          Region: Western Maharashtra
+          {isHi ? 'Kshetr: Western Maharashtra' : 'Region: Western Maharashtra'}
         </span>
       </div>
 
       {/* 2. Purchasing Overview Metrics Bar */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-xl p-4">
-          <span className="text-xs text-[#64756A] block">Categories Evaluated</span>
+          <span className="text-xs text-[#64756A] block">{isHi ? 'Jaanchi Gayi Categories' : 'Categories Evaluated'}</span>
           <span className="text-2xl font-bold text-[#25382D] font-mono mt-0.5 block">
             {totalCategoriesEvaluated}
           </span>
           <span className="text-[11px] text-[#64756A] mt-1 block">
-            Packaging, Food, Hygiene, Supplies
+            {isHi ? 'Packaging, Food, Hygiene, Supplies' : 'Packaging, Food, Hygiene, Supplies'}
           </span>
         </div>
 
         <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-xl p-4">
-          <span className="text-xs text-[#64756A] block">Reliable Comparisons</span>
+          <span className="text-xs text-[#64756A] block">{isHi ? 'Vishwasniya Tulnayein' : 'Reliable Comparisons'}</span>
           <span className="text-2xl font-bold text-[#25382D] font-mono mt-0.5 block">
             {reliableComparisonsCount}
           </span>
           <span className="text-[11px] text-[#2E7D4F] mt-1 block">
-            Satisfies &ge; 5 business threshold
+            {isHi ? '≥ 5 dukanon ka threshold' : 'Satisfies ≥ 5 business threshold'}
           </span>
         </div>
 
         <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-xl p-4">
-          <span className="text-xs text-[#64756A] block">Potential Savings Opps</span>
+          <span className="text-xs text-[#64756A] block">{isHi ? 'Bachat Ke Avasar' : 'Potential Savings Opps'}</span>
           <span className="text-2xl font-bold text-[#25382D] font-mono mt-0.5 block">
             {meaningfulOpps.length}
           </span>
           <span className="text-[11px] text-[#64756A] mt-1 block">
-            Unit prices above peer median
+            {isHi ? 'Market median se mehenge bhaav' : 'Unit prices above peer median'}
           </span>
         </div>
 
         <div className="bg-[#EDF7F1] border border-[#CDE8D8] rounded-xl p-4">
-          <span className="text-xs text-[#2E7D4F] font-semibold block">Total Estimated Difference</span>
+          <span className="text-xs text-[#2E7D4F] font-semibold block">{isHi ? 'Kul Sambhavit Bachat' : 'Total Estimated Difference'}</span>
           <CurrencyDisplay
             amountMinor={totalPotentialSavings}
             className="text-2xl font-bold text-[#2E7D4F] mt-0.5 block"
           />
           <span className="text-[11px] text-[#2E7D4F] mt-1 block">
-            At typical purchase volumes
+            {isHi ? 'Aam khareed volume par' : 'At typical purchase volumes'}
           </span>
         </div>
       </div>
@@ -180,20 +189,36 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
         <div className="space-y-1 max-w-2xl">
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-[#476C58]" />
-            <h3 className="text-sm font-bold text-[#25382D]">Collective Purchasing Intelligence Network</h3>
+            <h3 className="text-sm font-bold text-[#25382D]">
+              {isHi ? 'Samuhik Khareed Bhaav Network' : 'Collective Purchasing Intelligence Network'}
+            </h3>
           </div>
           <p className="text-xs text-[#64756A] leading-relaxed">
-            By voluntarily opting into the benchmark pool, your itemized purchase unit prices are anonymized, aggregated with at least 5 other independent businesses, and used to calculate regional median prices. Individual invoices, receipts, and merchant names are never shared.
+            {isHi
+              ? 'Benchmark network me shamil hone par aapke khareed bhaav anonymously 5+ vyapariyon ke sath aggregate hote hain. Bill number, dukan ka naam ya vyaktigat jankari kabhi share nahi hoti.'
+              : 'By voluntarily opting into the benchmark pool, your itemized purchase unit prices are anonymized, aggregated with at least 5 other independent businesses, and used to calculate regional median prices. Individual invoices, receipts, and merchant names are never shared.'}
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0 self-start sm:self-auto">
           <div className="text-right">
             <span className="text-xs font-semibold text-[#25382D] block">
-              {isOptedIn ? 'Network Active' : 'Participation Paused'}
+              {isHi
+                ? isOptedIn
+                  ? 'Network Sakriya Hai'
+                  : 'Yogdan Ruka Hua Hai'
+                : isOptedIn
+                ? 'Network Active'
+                : 'Participation Paused'}
             </span>
             <span className="text-[11px] text-[#64756A]">
-              {isOptedIn ? 'Contributing anonymously' : 'Not contributing data'}
+              {isHi
+                ? isOptedIn
+                  ? 'Gumnam roop se yogdan de rahe hain'
+                  : 'Data share nahi ho raha hai'
+                : isOptedIn
+                ? 'Contributing anonymously'
+                : 'Not contributing data'}
             </span>
           </div>
 
@@ -203,7 +228,7 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
             className={`p-1 rounded-full transition-colors cursor-pointer ${
               isOptedIn ? 'text-[#476C58]' : 'text-[#64756A]'
             }`}
-            title="Toggle Collective Benchmark Participation"
+            title={isHi ? 'Benchmark bhagidari toggle karein' : 'Toggle Collective Benchmark Participation'}
             aria-label="Toggle benchmark participation"
           >
             {isOptedIn ? (
@@ -225,7 +250,7 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
               : 'text-[#64756A] hover:text-[#25382D]'
           }`}
         >
-          All Categories ({opportunities.length})
+          {isHi ? `Sabhi Categories (${opportunities.length})` : `All Categories (${opportunities.length})`}
         </button>
         <button
           onClick={() => setActiveTab('opportunities')}
@@ -235,7 +260,7 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
               : 'text-[#64756A] hover:text-[#25382D]'
           }`}
         >
-          Savings Opportunities ({meaningfulOpps.length})
+          {isHi ? `Bachat Ke Avasar (${meaningfulOpps.length})` : `Savings Opportunities (${meaningfulOpps.length})`}
         </button>
         <button
           onClick={() => setActiveTab('competitive')}
@@ -245,7 +270,7 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
               : 'text-[#64756A] hover:text-[#25382D]'
           }`}
         >
-          Already Competitive ({competitiveItems.length})
+          {isHi ? `Pehle Se Sahi Bhaav (${competitiveItems.length})` : `Already Competitive (${competitiveItems.length})`}
         </button>
         <button
           onClick={() => setActiveTab('insufficient')}
@@ -255,7 +280,7 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
               : 'text-[#64756A] hover:text-[#25382D]'
           }`}
         >
-          Insufficient Data ({insufficientItems.length})
+          {isHi ? `Kam Data (${insufficientItems.length})` : `Insufficient Data (${insufficientItems.length})`}
         </button>
       </div>
 
@@ -272,7 +297,7 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs text-[#64756A] font-medium">{item.category}</span>
+                      <span className="text-xs text-[#64756A] font-medium">{tCategory(item.category)}</span>
                       <span className="text-xs text-[#64756A]">·</span>
                       <span className="text-xs text-[#64756A]">{item.specification}</span>
                     </div>
@@ -282,14 +307,14 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
                   </div>
 
                   <span className="self-start sm:self-auto text-xs font-semibold px-2.5 py-1 rounded-full bg-[#FDF8F0] text-[#C0772C] border border-[#F3E2CE]">
-                    Potential Price Improvement
+                    {isHi ? 'Bhaav Sudhar Ka Avasar' : 'Potential Price Improvement'}
                   </span>
                 </div>
 
                 {/* Pricing comparison metrics grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#F7F8F5] p-3.5 rounded-xl border border-[#E2E7E2] text-xs">
                   <div>
-                    <span className="text-[#64756A] block text-[11px]">Your Recorded Price</span>
+                    <span className="text-[#64756A] block text-[11px]">{isHi ? 'Aapka Darj Bhaav' : 'Your Recorded Price'}</span>
                     <div className="flex items-baseline gap-1 mt-0.5">
                       <CurrencyDisplay
                         amountMinor={item.currentRecordedPriceMinor}
@@ -301,7 +326,7 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
                   </div>
 
                   <div>
-                    <span className="text-[#64756A] block text-[11px]">Regional Benchmark</span>
+                    <span className="text-[#64756A] block text-[11px]">{isHi ? 'Regional Thok Benchmark' : 'Regional Benchmark'}</span>
                     <div className="flex items-baseline gap-1 mt-0.5">
                       <CurrencyDisplay
                         amountMinor={item.benchmarkMedianPriceMinor}
@@ -313,7 +338,7 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
                   </div>
 
                   <div>
-                    <span className="text-[#64756A] block text-[11px]">Difference Per Unit</span>
+                    <span className="text-[#64756A] block text-[11px]">{isHi ? 'Prati Unit Antar' : 'Difference Per Unit'}</span>
                     <div className="mt-0.5">
                       <CurrencyDisplay
                         amountMinor={item.differencePerUnitMinor}
@@ -325,13 +350,15 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
                   </div>
 
                   <div>
-                    <span className="text-[#64756A] block text-[11px]">Estimated Opportunity</span>
+                    <span className="text-[#64756A] block text-[11px]">{isHi ? 'Sambhavit Bachat' : 'Estimated Opportunity'}</span>
                     <CurrencyDisplay
                       amountMinor={item.estimatedPotentialSavingsMinor}
                       className="text-base font-bold text-[#2E7D4F] mt-0.5 block"
                     />
                     <span className="text-[10px] text-[#64756A] block">
-                      at {item.typicalPurchaseVolume} {item.unit}s
+                      {isHi
+                        ? `${item.typicalPurchaseVolume} ${item.unit}s par`
+                        : `at ${item.typicalPurchaseVolume} ${item.unit}s`}
                     </span>
                   </div>
                 </div>
@@ -339,28 +366,36 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
                 {/* Evidence & Explanation */}
                 <div className="text-xs text-[#64756A] space-y-1">
                   <p className="leading-relaxed">
-                    <strong className="text-[#25382D]">Why this comparison is valid:</strong> {item.explanation}
+                    <strong className="text-[#25382D]">{isHi ? 'Tulna kyu sahi hai: ' : 'Why this comparison is valid: '}</strong>
+                    {item.explanation}
                   </p>
                   <p className="leading-relaxed">
-                    <strong className="text-[#25382D]">Suggested action:</strong> {item.suggestedAction}
+                    <strong className="text-[#25382D]">{isHi ? 'Sujhav: ' : 'Suggested action: '}</strong>
+                    {item.suggestedAction}
                   </p>
                 </div>
 
                 {/* Footer metadata */}
                 <div className="pt-3 border-t border-[#E2E7E2] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-[#64756A]">
                   <div className="flex items-center gap-3">
-                    <span>Evidence: {item.independentBusinessesCount} independent businesses</span>
+                    <span>
+                      {isHi
+                        ? `Saboot: ${item.independentBusinessesCount} alag-alag vyapari`
+                        : `Evidence: ${item.independentBusinessesCount} independent businesses`}
+                    </span>
                     <span>·</span>
-                    <span>Period: {item.benchmarkPeriod}</span>
+                    <span>{isHi ? `Samay: ${item.benchmarkPeriod}` : `Period: ${item.benchmarkPeriod}`}</span>
                     <span>·</span>
-                    <span className="text-[#2E7D4F] font-medium">{item.confidence} Confidence</span>
+                    <span className="text-[#2E7D4F] font-medium">
+                      {isHi ? `${item.confidence} Vishwasniyata` : `${item.confidence} Confidence`}
+                    </span>
                   </div>
 
                   <button
                     onClick={() => onNavigate('/ledger')}
                     className="flex items-center gap-1 font-semibold text-[#476C58] hover:text-[#25382D] cursor-pointer"
                   >
-                    <span>View Invoices in Ledger</span>
+                    <span>{isHi ? 'Khata Me Bill Dekhein' : 'View Invoices in Ledger'}</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -376,7 +411,7 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs text-[#64756A] font-medium">{item.category}</span>
+                      <span className="text-xs text-[#64756A] font-medium">{tCategory(item.category)}</span>
                       <span className="text-xs text-[#64756A]">·</span>
                       <span className="text-xs text-[#64756A]">{item.specification}</span>
                     </div>
@@ -387,19 +422,19 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
 
                   <span className="self-start sm:self-auto text-xs font-semibold px-2.5 py-1 rounded-full bg-[#EDF7F1] text-[#2E7D4F] border border-[#CDE8D8] flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Purchasing Competitively</span>
+                    <span>{isHi ? 'Kifayati Bhaav Par Khareed' : 'Purchasing Competitively'}</span>
                   </span>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-[#F7F8F5] border border-[#E2E7E2] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                   <div>
-                    <span className="text-[#64756A] block">Your recorded price</span>
+                    <span className="text-[#64756A] block">{isHi ? 'Aapka darj bhaav' : 'Your recorded price'}</span>
                     <span className="font-mono font-bold text-[#25382D] text-sm mt-0.5 block">
                       {formatINR(item.currentRecordedPriceMinor, { showDecimals: true })} / {item.unit}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[#64756A] block">Regional benchmark median</span>
+                    <span className="text-[#64756A] block">{isHi ? 'Regional benchmark median' : 'Regional benchmark median'}</span>
                     <span className="font-mono font-bold text-[#476C58] text-sm mt-0.5 block">
                       {formatINR(item.benchmarkMedianPriceMinor, { showDecimals: true })} / {item.unit}
                     </span>
@@ -410,9 +445,13 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
                 </div>
 
                 <div className="pt-2 flex items-center gap-3 text-[11px] text-[#64756A]">
-                  <span>Validated across {item.independentBusinessesCount} independent businesses</span>
+                  <span>
+                    {isHi
+                      ? `${item.independentBusinessesCount} alag vyapariyon me satyapit`
+                      : `Validated across ${item.independentBusinessesCount} independent businesses`}
+                  </span>
                   <span>·</span>
-                  <span>No minor savings fabricated</span>
+                  <span>{isHi ? 'Koi banawati bachat nahi' : 'No minor savings fabricated'}</span>
                 </div>
               </div>
             );
@@ -426,7 +465,7 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-[#64756A] font-medium">{item.category}</span>
+                      <span className="text-xs text-[#64756A] font-medium">{tCategory(item.category)}</span>
                       <span className="text-xs text-[#64756A]">·</span>
                       <span className="text-xs text-[#64756A]">{item.specification}</span>
                     </div>
@@ -437,7 +476,7 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
 
                   <span className="self-start sm:self-auto text-xs font-semibold px-2.5 py-1 rounded-full bg-[#F7F8F5] text-[#64756A] border border-[#E2E7E2] flex items-center gap-1">
                     <HelpCircle className="w-3.5 h-3.5 text-[#64756A]" />
-                    <span>Insufficient Data Yet</span>
+                    <span>{isHi ? 'Abhi Pura Data Nahi Hai' : 'Insufficient Data Yet'}</span>
                   </span>
                 </div>
 
@@ -451,12 +490,16 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
                 </div>
 
                 <div className="pt-2 flex items-center justify-between text-[11px] text-[#64756A]">
-                  <span>Current contributors: {item.independentBusinessesCount} / 5 required businesses</span>
+                  <span>
+                    {isHi
+                      ? `Yogdan: ${item.independentBusinessesCount} / 5 zaroori vyapari`
+                      : `Current contributors: ${item.independentBusinessesCount} / 5 required businesses`}
+                  </span>
                   <button
                     onClick={() => onNavigate('/scan')}
                     className="text-[#476C58] font-semibold hover:underline"
                   >
-                    Upload Receipt for This Category &rarr;
+                    {isHi ? 'Is Category Ka Bill Upload Karein →' : 'Upload Receipt for This Category →'}
                   </button>
                 </div>
               </div>
@@ -470,24 +513,38 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-xl">
             <h3 className="text-lg font-bold text-[#25382D]">
-              Collective Benchmark Methodology
+              {isHi ? 'Samuhik Benchmark Vidhi' : 'Collective Benchmark Methodology'}
             </h3>
             <div className="text-xs text-[#64756A] space-y-3 leading-relaxed">
               <p>
-                Pricewise uses a transparent, evidence-based algorithm to ensure benchmarks reflect genuine market purchasing dynamics:
+                {isHi
+                  ? 'Pricewise ek spasht, saboot-aadhaarit algorithm use karta hai taaki benchmarks sachhe market rate darshayein:'
+                  : 'Pricewise uses a transparent, evidence-based algorithm to ensure benchmarks reflect genuine market purchasing dynamics:'}
               </p>
               <ul className="list-disc pl-5 space-y-1.5">
                 <li>
-                  <strong className="text-[#25382D]">Comparable Unit Normalization:</strong> Products are matched strictly on verified specifications, packaging types, and base units (e.g. per kg, per box, per roll).
+                  <strong className="text-[#25382D]">{isHi ? 'Sahi Unit Normalization: ' : 'Comparable Unit Normalization: '}</strong>
+                  {isHi
+                    ? 'Products ko strictly verified specifications aur base units (jaise per kg, per box, per roll) ke aadhar par compare kiya jata hai.'
+                    : 'Products are matched strictly on verified specifications, packaging types, and base units (e.g. per kg, per box, per roll).'}
                 </li>
                 <li>
-                  <strong className="text-[#25382D]">Threshold of 5 Independent Businesses:</strong> Benchmarks are never published unless at least 5 distinct businesses have contributed transactions in the current rolling 90-day window.
+                  <strong className="text-[#25382D]">{isHi ? '5 Alag Vyapariyon Ka Threshold: ' : 'Threshold of 5 Independent Businesses: '}</strong>
+                  {isHi
+                    ? 'Benchmarks tabhi publish hote hain jab kam se kam 5 alag vyapariyon ne 90 dino ke dauraan khareed darj ki ho.'
+                    : 'Benchmarks are never published unless at least 5 distinct businesses have contributed transactions in the current rolling 90-day window.'}
                 </li>
                 <li>
-                  <strong className="text-[#25382D]">Trimmed Median:</strong> We use the median unit price rather than a simple average, filtering statistical outliers caused by one-off rush deliveries or extreme volumes.
+                  <strong className="text-[#25382D]">{isHi ? 'Trimmed Median: ' : 'Trimmed Median: '}</strong>
+                  {isHi
+                    ? 'Aam average ke bajay hum median rate nikaalte hain taaki achanak rush deliveries ya abnormal rates se bacha ja sake.'
+                    : 'We use the median unit price rather than a simple average, filtering statistical outliers caused by one-off rush deliveries or extreme volumes.'}
                 </li>
                 <li>
-                  <strong className="text-[#25382D]">No Fabricated Savings:</strong> If your purchase price is within 5% of the benchmark, we state clearly that you are purchasing competitively without inventing fake recommendations.
+                  <strong className="text-[#25382D]">{isHi ? 'Koi Jhoothi Bachat Nahi: ' : 'No Fabricated Savings: '}</strong>
+                  {isHi
+                    ? 'Agar aapka khareed bhaav benchmark se 5% ke daayre me hai, toh hum saaf kehte hain ki aap pehle se sahi bhaav par khareed rahe hain.'
+                    : 'If your purchase price is within 5% of the benchmark, we state clearly that you are purchasing competitively without inventing fake recommendations.'}
                 </li>
               </ul>
             </div>
@@ -496,7 +553,7 @@ export const SaveMoreView: React.FC<SaveMoreViewProps> = ({
                 onClick={() => setShowMethodologyModal(false)}
                 className="px-4 py-2 rounded-xl bg-[#476C58] text-white text-xs font-semibold hover:bg-[#3a5948] cursor-pointer"
               >
-                Close
+                {isHi ? 'Band Karein' : 'Close'}
               </button>
             </div>
           </div>

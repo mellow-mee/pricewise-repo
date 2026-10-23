@@ -23,6 +23,7 @@ import {
   HelpCircle,
 } from 'lucide-react';
 import { formatINR } from '../utils/finance.ts';
+import { useLanguage } from '../context/LanguageContext.tsx';
 
 interface AskViewProps {
   business: Business | null;
@@ -31,8 +32,26 @@ interface AskViewProps {
 }
 
 export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate }) => {
-  const [messages, setMessages] = useState<AssistantChatMessage[]>([
-    {
+  const { language, t } = useLanguage();
+  const isHi = language === 'hi';
+
+  const getInitialMessage = (lang: string): AssistantChatMessage => {
+    if (lang === 'hi') {
+      return {
+        id: 'init-1',
+        sender: 'assistant',
+        timestamp: new Date().toISOString(),
+        text: `Namaste Rahul ji. Main aapka **Pricewise Vyapar Sahayak** hoon — **${business?.name || 'Green Basket Stores'}** ke liye.\n\nMujhe aapke pichle 6 mahino ke satyapit kharche (${receipts.length} itemized billein) aur ilaqe ke thok market rate benchmarks ki poori jankari hai. Aap mujhse kisi bhi vyapari, saman ki category, ya bachat ke bare me pooch sakte hain.`,
+        suggestedFollowUps: [
+          'Is mahine mera kul kitna kharcha hua?',
+          'Sabse zyada payments kin vyapariyon ko gaye?',
+          'Kya main packaging ke liye sahi bhaav de raha hoon?',
+          'Kahan par kharcha bacha sakte hain?',
+        ],
+        isDemo: true,
+      };
+    }
+    return {
       id: 'init-1',
       sender: 'assistant',
       timestamp: new Date().toISOString(),
@@ -44,21 +63,38 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
         'Where can I realistically reduce purchasing costs?',
       ],
       isDemo: true,
-    },
-  ]);
+    };
+  };
 
+  const [messages, setMessages] = useState<AssistantChatMessage[]>(() => [getInitialMessage(language)]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const starterQuestions = [
-    'How much did I spend this month?',
-    'Which suppliers received the most money?',
-    'What are my largest expense categories?',
-    'Which comparable products might offer savings?',
-    'How has my spending changed over six months?',
-    'Am I paying a competitive price for packaging?',
-  ];
+  // Update initial message if conversation hasn't started yet and language switches
+  useEffect(() => {
+    if (messages.length === 1 && messages[0].id === 'init-1') {
+      setMessages([getInitialMessage(language)]);
+    }
+  }, [language]);
+
+  const starterQuestions = isHi
+    ? [
+        'Is mahine mera kul kitna kharcha hua?',
+        'Sabse zyada payments kin vyapariyon ko gaye?',
+        'Mera sabse bada kharcha kin categories me hai?',
+        'Kin saman par bachat ke sabse acche avasar hain?',
+        'Pichle 6 mahino me kharcha kaise badla hai?',
+        'Kya main packaging ke liye sahi thok bhaav de raha hoon?',
+      ]
+    : [
+        'How much did I spend this month?',
+        'Which suppliers received the most money?',
+        'What are my largest expense categories?',
+        'Which comparable products might offer savings?',
+        'How has my spending changed over six months?',
+        'Am I paying a competitive price for packaging?',
+      ];
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -84,7 +120,7 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
     setIsLoading(true);
 
     try {
-      const assistantResponse = await askAssistant(prompt);
+      const assistantResponse = await askAssistant(prompt, language);
       setMessages((prev) => [...prev, assistantResponse]);
     } catch (err) {
       console.error('Ask assistant error:', err);
@@ -92,7 +128,9 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
         id: `err-${Date.now()}`,
         sender: 'assistant',
         timestamp: new Date().toISOString(),
-        text: 'I encountered an error analyzing your purchasing ledger. Please check your network connection and try again.',
+        text: isHi
+          ? 'Ledger analyze karne me dikkat aayi. Kripya apna internet connection check karein aur dobara koshish karein.'
+          : 'I encountered an error analyzing your purchasing ledger. Please check your network connection and try again.',
       };
       setMessages((prev) => [...prev, fallbackMsg]);
     } finally {
@@ -109,16 +147,20 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-[#25382D]">Purchasing AI Assistant</h1>
+            <h1 className="text-lg font-bold text-[#25382D]">
+              {isHi ? 'Khareed Vyapar Sahayak (AI)' : 'Purchasing AI Assistant'}
+            </h1>
             <p className="text-xs text-[#64756A]">
-              Grounded in {receipts.length} verified invoices for {business?.name || 'Green Basket Stores'}
+              {isHi
+                ? `${business?.name || 'Green Basket Stores'} ke ${receipts.length} satyapit billon par aadharit`
+                : `Grounded in ${receipts.length} verified invoices for ${business?.name || 'Green Basket Stores'}`}
             </p>
           </div>
         </div>
 
         <div className="hidden sm:flex items-center gap-1.5 text-xs text-[#2E7D4F] bg-[#EDF7F1] px-2.5 py-1 rounded-lg border border-[#CDE8D8]">
           <ShieldCheck className="w-3.5 h-3.5" />
-          <span>Private Business Tenancy</span>
+          <span>{isHi ? 'Surakshit Vyapar Data' : 'Private Business Tenancy'}</span>
         </div>
       </div>
 
@@ -173,7 +215,7 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
                 {msg.referencedReceiptIds && msg.referencedReceiptIds.length > 0 && (
                   <div className="pt-2 border-t border-[#E2E7E2] flex items-center gap-2 flex-wrap">
                     <span className="text-[10px] text-[#64756A] font-semibold">
-                      Referenced Invoices:
+                      {isHi ? 'Jude hue bill:' : 'Referenced Invoices:'}
                     </span>
                     {msg.referencedReceiptIds.map((id) => (
                       <button
@@ -192,7 +234,7 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
                 {msg.suggestedFollowUps && msg.suggestedFollowUps.length > 0 && (
                   <div className="pt-2 border-t border-[#E2E7E2] space-y-1.5">
                     <span className="text-[10px] text-[#64756A] font-semibold block">
-                      Suggested follow-ups:
+                      {isHi ? 'Aage pooch sakte hain:' : 'Suggested follow-ups:'}
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {msg.suggestedFollowUps.map((fu, idx) => (
@@ -219,7 +261,11 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
             </div>
             <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-4 text-xs text-[#64756A] shadow-xs flex items-center gap-2">
               <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#476C58]" />
-              <span>Analyzing itemized ledger and peer benchmarks...</span>
+              <span>
+                {isHi
+                  ? 'Kharchon ka khata aur market benchmarks jaanch rahe hain...'
+                  : 'Analyzing itemized ledger and peer benchmarks...'}
+              </span>
             </div>
           </div>
         )}
@@ -231,7 +277,7 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
       {messages.length <= 2 && (
         <div className="py-2 space-y-1.5">
           <span className="text-[11px] text-[#64756A] font-medium block">
-            Suggested starter queries:
+            {isHi ? 'Sujhav diye gaye prashna:' : 'Suggested starter queries:'}
           </span>
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
             {starterQuestions.map((q, idx) => (
@@ -258,7 +304,11 @@ export const AskView: React.FC<AskViewProps> = ({ business, receipts, onNavigate
         <div className="relative flex-1">
           <input
             type="text"
-            placeholder="Ask about spending, suppliers, packaging prices, or benchmarks..."
+            placeholder={
+              isHi
+                ? 'Kharche, vyapari, packaging ke bhaav ya bachat ke bare me poochein...'
+                : 'Ask about spending, suppliers, packaging prices, or benchmarks...'
+            }
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             disabled={isLoading}

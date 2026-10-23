@@ -15,6 +15,7 @@ import {
   Layers,
   FileSpreadsheet,
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext.tsx';
 
 interface MonthlySpreadsheetProps {
   receipts: Receipt[];
@@ -52,6 +53,9 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
   selectedMonth: propSelectedMonth,
   onMonthChange: propOnMonthChange,
 }) => {
+  const { language, tCategory } = useLanguage();
+  const isHi = language === 'hi';
+
   const [internalYear, setInternalYear] = useState<number>(initialYear);
   const [internalMonth, setInternalMonth] = useState<number>(initialMonth);
 
@@ -243,10 +247,14 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <FileSpreadsheet className="w-5 h-5 text-[#476C58]" />
-            <h2 className="text-lg font-bold text-[#25382D]">Monthly Spending Spreadsheet</h2>
+            <h2 className="text-lg font-bold text-[#25382D]">
+              {isHi ? 'Mahine ka Kharcha Spreadsheet' : 'Monthly Spending Spreadsheet'}
+            </h2>
           </div>
           <p className="text-xs text-[#64756A] mt-0.5">
-            Spreadsheet ledger view of line items, unit prices, taxes, and category totals.
+            {isHi
+              ? 'Line items, unit rates, taxes aur category kharcha ki vistaar soochi.'
+              : 'Spreadsheet ledger view of line items, unit prices, taxes, and category totals.'}
           </p>
         </div>
 
@@ -308,7 +316,7 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
             title="Export monthly spreadsheet to CSV"
           >
             <Download className="w-3.5 h-3.5 text-[#476C58]" />
-            <span>Export CSV</span>
+            <span>{isHi ? 'CSV Download' : 'Export CSV'}</span>
           </button>
         </div>
       </div>
@@ -316,14 +324,14 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
       {/* 2. Quick Monthly Summary Pill Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#F7F8F5] p-3 rounded-xl border border-[#E2E7E2] text-xs">
         <div>
-          <span className="text-[11px] text-[#64756A] block">Selected Period</span>
+          <span className="text-[11px] text-[#64756A] block">{isHi ? 'Chuna Hua Mahina' : 'Selected Period'}</span>
           <span className="font-bold text-[#25382D] text-sm mt-0.5 block">
             {monthName} {selectedYear}
           </span>
         </div>
 
         <div>
-          <span className="text-[11px] text-[#64756A] block">Total Monthly Spending</span>
+          <span className="text-[11px] text-[#64756A] block">{isHi ? 'Kul Mahine Ka Kharcha' : 'Total Monthly Spending'}</span>
           <CurrencyDisplay
             amountMinor={totalSpendMinor}
             className="font-bold text-[#25382D] text-sm mt-0.5 block"
@@ -331,14 +339,16 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
         </div>
 
         <div>
-          <span className="text-[11px] text-[#64756A] block">Recorded Purchases</span>
+          <span className="text-[11px] text-[#64756A] block">{isHi ? 'Darj Ki Gayi Khareed' : 'Recorded Purchases'}</span>
           <span className="font-bold text-[#25382D] text-sm mt-0.5 block">
-            {monthReceipts.length} bills ({spreadsheetRows.length} line items)
+            {isHi
+              ? `${monthReceipts.length} billein (${spreadsheetRows.length} items)`
+              : `${monthReceipts.length} bills (${spreadsheetRows.length} line items)`}
           </span>
         </div>
 
         <div>
-          <span className="text-[11px] text-[#64756A] block">GST & Taxes</span>
+          <span className="text-[11px] text-[#64756A] block">{isHi ? 'GST aur Tax' : 'GST & Taxes'}</span>
           <CurrencyDisplay
             amountMinor={totalTaxMinor}
             className="font-bold text-[#64756A] text-sm mt-0.5 block"
@@ -356,26 +366,32 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
                 <th className="py-2.5 px-3 font-semibold w-10 text-center border-r border-[#D4DDD5] bg-[#E5EBE6]">
                   #
                 </th>
-                <th className="py-2.5 px-3 font-semibold w-24 border-r border-[#D4DDD5]">Date</th>
+                <th className="py-2.5 px-3 font-semibold w-24 border-r border-[#D4DDD5]">
+                  {isHi ? 'Tarikh' : 'Date'}
+                </th>
                 <th className="py-2.5 px-3 font-semibold border-r border-[#D4DDD5] min-w-[160px]">
-                  Supplier / Payee
+                  {isHi ? 'Vyapari / Dukaan' : 'Supplier / Payee'}
                 </th>
                 <th className="py-2.5 px-3 font-semibold border-r border-[#D4DDD5] min-w-[130px]">
-                  Category
+                  {isHi ? 'Category' : 'Category'}
                 </th>
                 <th className="py-2.5 px-3 font-semibold border-r border-[#D4DDD5] min-w-[220px]">
-                  Item Description
+                  {isHi ? 'Saman ka Vivaran' : 'Item Description'}
                 </th>
-                <th className="py-2.5 px-3 font-semibold text-right w-16 border-r border-[#D4DDD5]">Qty</th>
-                <th className="py-2.5 px-3 font-semibold w-16 border-r border-[#D4DDD5]">Unit</th>
+                <th className="py-2.5 px-3 font-semibold text-right w-16 border-r border-[#D4DDD5]">
+                  {isHi ? 'Qty' : 'Qty'}
+                </th>
+                <th className="py-2.5 px-3 font-semibold w-16 border-r border-[#D4DDD5]">
+                  {isHi ? 'Unit' : 'Unit'}
+                </th>
                 <th className="py-2.5 px-3 font-semibold text-right border-r border-[#D4DDD5] min-w-[100px]">
-                  Unit Price
+                  {isHi ? 'Unit Bhaav' : 'Unit Price'}
                 </th>
                 <th className="py-2.5 px-3 font-semibold text-right border-r border-[#D4DDD5] min-w-[90px]">
-                  GST
+                  {isHi ? 'GST' : 'GST'}
                 </th>
                 <th className="py-2.5 px-3 font-semibold text-right min-w-[110px] bg-[#E5EBE6]">
-                  Total
+                  {isHi ? 'Kul Rakam' : 'Total'}
                 </th>
               </tr>
             </thead>
@@ -387,10 +403,14 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
                   <td colSpan={10} className="py-12 text-center text-xs text-[#64756A] space-y-1">
                     <Layers className="w-6 h-6 mx-auto text-[#A9BCAE] mb-2" />
                     <p className="font-semibold text-[#25382D]">
-                      No purchases recorded for {monthName} {selectedYear}
+                      {isHi
+                        ? `${monthName} ${selectedYear} ke liye koi khareed darj nahi hai`
+                        : `No purchases recorded for ${monthName} ${selectedYear}`}
                     </p>
                     <p className="text-[11px]">
-                      Use the month switcher above to browse previous months or upload a receipt in the Scan tab.
+                      {isHi
+                        ? 'Pichle mahine dekhne ke liye upar month switcher use karein ya Scan tab me jakar bill upload karein.'
+                        : 'Use the month switcher above to browse previous months or upload a receipt in the Scan tab.'}
                     </p>
                   </td>
                 </tr>
@@ -410,7 +430,7 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
                       {row.supplier}
                     </td>
                     <td className="py-2 px-3 text-[#64756A] border-r border-[#E8ECE8] whitespace-nowrap">
-                      {row.category}
+                      {tCategory(row.category)}
                     </td>
                     <td className="py-2 px-3 text-[#25382D] border-r border-[#E8ECE8] truncate max-w-[240px]">
                       {row.description}
@@ -444,7 +464,7 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
               <tfoot className="bg-[#EDF1EE] border-t-2 border-[#D4DDD5] text-xs font-bold text-[#25382D]">
                 <tr>
                   <td colSpan={5} className="py-2.5 px-3 text-right border-r border-[#D4DDD5] font-sans">
-                    TOTAL MONTHLY SPENDING (SUM):
+                    {isHi ? 'KUL MAHINE KA KHARCHA (SUM):' : 'TOTAL MONTHLY SPENDING (SUM):'}
                   </td>
                   <td className="py-2.5 px-3 text-right font-mono border-r border-[#D4DDD5]">
                     {spreadsheetRows.reduce((acc, r) => acc + r.qty, 0)}
@@ -468,7 +488,9 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
       {categorySummary.length > 0 && (
         <div className="pt-2">
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#64756A] block mb-2">
-            Category Breakdown for {monthName} {selectedYear}
+            {isHi
+              ? `${monthName} ${selectedYear} ke liye Category Breakdown`
+              : `Category Breakdown for ${monthName} ${selectedYear}`}
           </span>
           <div className="flex flex-wrap gap-2">
             {categorySummary.map(([cat, data]) => {
@@ -478,7 +500,7 @@ export const MonthlySpreadsheet: React.FC<MonthlySpreadsheetProps> = ({
                   key={cat}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#F7F8F5] border border-[#E2E7E2] text-xs"
                 >
-                  <span className="font-semibold text-[#25382D]">{cat}:</span>
+                  <span className="font-semibold text-[#25382D]">{tCategory(cat)}:</span>
                   <CurrencyDisplay amountMinor={data.totalMinor} className="font-bold text-[#476C58]" />
                   <span className="text-[10px] text-[#64756A]">({percentage}%)</span>
                 </div>

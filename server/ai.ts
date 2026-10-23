@@ -8,14 +8,16 @@ import { AssistantChatMessage, Receipt, ReceiptLineItem } from '../src/types/ind
 import { db } from './db.ts';
 import { formatINR } from '../src/utils/finance.ts';
 
-const apiKey = process.env.GEMINI_API_KEY;
-let aiClient: GoogleGenAI | null = null;
-
-if (apiKey && apiKey !== 'MY_GEMINI_API_KEY') {
+function getAiClient(): GoogleGenAI | null {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'MY_GEMINI_API_KEY') {
+    return null;
+  }
   try {
-    aiClient = new GoogleGenAI();
+    return new GoogleGenAI();
   } catch (err) {
     console.warn('Gemini SDK initialization note:', err);
+    return null;
   }
 }
 
@@ -46,6 +48,7 @@ export async function extractReceiptFromImage(
 ): Promise<ExtractedReceiptDraft> {
   const cleanBase64 = base64Data.replace(/^data:[a-zA-Z0-9/+-]+;base64,/, '');
 
+  const aiClient = getAiClient();
   if (aiClient) {
     try {
       const prompt = `You are a high-precision OCR and invoice parsing engine for retail and commercial purchasing receipts in India.
@@ -240,7 +243,10 @@ function generateIntelligentFallbackDraft(): ExtractedReceiptDraft {
  * Grounded AI Purchasing Assistant.
  * Uses deterministic calculations for exact numbers, then synthesizes with Gemini.
  */
-export async function answerPurchasingQuestion(userPrompt: string): Promise<AssistantChatMessage> {
+export async function answerPurchasingQuestion(
+  userPrompt: string,
+  language: 'en' | 'hi' = 'en'
+): Promise<AssistantChatMessage> {
   const business = db.getBusiness();
   const receipts = db.getReceipts().filter((r) => r.status === 'confirmed');
   const opportunities = db.getSavingsOpportunities();
@@ -317,6 +323,7 @@ export async function answerPurchasingQuestion(userPrompt: string): Promise<Assi
   let aiAnswerText = '';
   const referencedReceiptIds = receipts.slice(0, 3).map((r) => r.id);
 
+  const aiClient = getAiClient();
   if (aiClient) {
     try {
       const prompt = `You are Pricewise's purchasing intelligence assistant for ${business.name}.
@@ -330,11 +337,12 @@ ${JSON.stringify(contextData, null, 2)}
 User Question: "${userPrompt}"
 
 Instructions:
-- Keep the response direct, professional, and practical (2-4 concise paragraphs).
+${language === 'hi' ? `- CRITICAL LANGUAGE REQUIREMENT: Respond in natural, professional business Hinglish (using Latin script). Use standard Indian commerce terminology such as 'Kharcha' (spend), 'Bachat' (savings), 'Dukaan' (store/business), 'Thok Bhaav' (wholesale rate/median), 'Billein' (invoices/bills), 'Farak' (difference), while keeping business names and currency amounts (₹) exact and legible.` : '- Keep the response direct, professional, and practical.'}
+- Keep the response in 2-4 concise paragraphs with clear bullet points.
 - Format currency amounts with ₹ (Indian Rupees).
 - Highlight key takeaways with bullet points.
 - If recommending savings, note that these are potential opportunities based on aggregate benchmark comparisons, not guaranteed discounts.
-- Propose 2-3 logical follow-up questions at the very end as JSON or a numbered list.`;
+- Propose 2-3 logical follow-up questions at the very end as a numbered list.`;
 
       const response = await aiClient.models.generateContent({
         model: 'gemini-3.8-flash',
@@ -350,8 +358,10 @@ Instructions:
 
   // If Gemini wasn't called or failed, provide grounded deterministic answers
   if (!aiAnswerText) {
-    aiAnswerText = buildDeterministicAnswer(userPrompt, contextData);
+    aiAnswerText = buildDeterministicAnswer(userPrompt, contextData, language);
   }
+
+  const isHi = language === 'hi';
 
   return {
     id: `msg-${Date.now()}`,
@@ -359,23 +369,67 @@ Instructions:
     timestamp: new Date().toISOString(),
     text: aiAnswerText,
     groundedMetrics: [
-      { label: 'Current Month Spend', value: formatINR(currentMonthSpend) },
-      { label: 'Identified Savings Opps', value: formatINR(totalPotentialSavings) },
-      { label: 'Top Category', value: sortedCategories[0]?.split(':')[0] || 'Packaging' },
+      { label: isHi ? 'Is Mahine Ka Kharcha' : 'Current Month Spend', value: formatINR(currentMonthSpend) },
+      { label: isHi ? 'Sambhavit Bachat' : 'Identified Savings Opps', value: formatINR(totalPotentialSavings) },
+      { label: isHi ? 'Top Kharcha Category' : 'Top Category', value: sortedCategories[0]?.split(':')[0] || 'Packaging' },
     ],
     referencedReceiptIds,
-    suggestedFollowUps: [
-      'Which suppliers received the most money this quarter?',
-      'How does my packaging price compare to regional peers?',
-      'Where can I reduce purchasing costs without switching quality?',
-    ],
+    suggestedFollowUps: isHi
+      ? [
+          'Sabse zyada payment kis supplier ko gayi hai?',
+          'Packaging boxes ka rate regional thok bhaav ke mukable kaisa hai?',
+          'Kharche mein turant bachat kahan se shuru karein?',
+        ]
+      : [
+          'Which suppliers received the most money this quarter?',
+          'How does my packaging price compare to regional peers?',
+          'Where can I reduce purchasing costs without switching quality?',
+        ],
     isDemo: true,
   };
 }
 
-function buildDeterministicAnswer(query: string, ctx: any): string {
+function buildDeterministicAnswer(query: string, ctx: any, language: 'en' | 'hi' = 'en'): string {
   const q = query.toLowerCase();
 
+  if (language === 'hi') {
+    if (q.includes('spend') || q.includes('kharcha') || q.includes('how much') || q.includes('kitna') || q.includes('mahina') || q.includes('month')) {
+      return `**October 2026** mein, **${ctx.businessName}** ka kul darj kharcha **${ctx.currentMonthSpend}** raha, jo pichhle mahine (September 2026, ${ctx.prevMonthSpend}) ke mukable ${ctx.momChangePercent > 0 ? '+' : ''}${ctx.momChangePercent}% badha hai.
+
+Is mahine ke sabse bade kharche:
+• **Inventory & Food**: ${ctx.categoryBreakdown[0] || '₹42,210'}
+• **Packaging Saman**: ${ctx.categoryBreakdown[1] || '₹24,276'}
+• **Bijli & Facilities**: ${ctx.categoryBreakdown[2] || '₹10,806'}
+
+Aapke verified khate ke aadhar par packaging aur hygiene supplies mein kareeb **${ctx.totalPotentialSavings}** ki sambhavit bachat (savings opportunity) identify hui hai.`;
+    }
+
+    if (q.includes('supplier') || q.includes('vendor') || q.includes('who') || q.includes('company') || q.includes('kis')) {
+      return `Aapke sabse bade suppliers (kul payment ke anusaar):
+${ctx.topSuppliers.map((s: string) => `• **${s}**`).join('\n')}
+
+**Nilgiri Organic Plantations** aapka sabse bada supply partner hai (bulk chai patti aur khade masalon ke liye). Chai patti ke rates regional wholesale thok bhaav ke bilkul barabar aur competitive hain.`;
+    }
+
+    if (q.includes('packaging') || q.includes('box') || q.includes('competitive') || q.includes('bachat') || q.includes('saving') || q.includes('rate')) {
+      return `Regional dukaandaron ke verified collective thok bhaav ke mutabiq:
+
+• **Packaging Boxes (3-Ply Kraft 10x8x6)**: Aapka purchase rate **₹12.00/box** hai jabki regional median bhaav **₹9.50/box** hai (8 dukaano ke beech ₹2.50 per unit ka farak). 500 boxes ke order par aap lagbhag **₹1,250** bacha sakte hain.
+• **Kraft Paper Carry Bags**: Aapka rate **₹7.20/bag** hai jabki bazaar ka benchmark **₹5.80/bag** hai (1,000 bags par sambhavit bachat: **₹1,400**).
+
+**Sujhav**: Agle order par vendor (jaise PackTech Solutions) se volume discount ya price match ki baat karein.`;
+    }
+
+    return `Aapki dukaan **${ctx.businessName}** ke purchasing performance ka hisaab:
+
+• **Is Mahine Ka Kharcha**: ${ctx.currentMonthSpend} (verified bills ke anusaar).
+• **Sabse Badi Kharcha Category**: ${ctx.categoryBreakdown[0] || 'Inventory & Food'}.
+• **Sambhavit Bachat ka Mauka**: Lagbhag ${ctx.totalPotentialSavings} tak ki bachat packaging aur store supplies ke regional median rates par.
+
+Aap **Kharcha Khata** mein saare bills dekh sakte hain ya **Bachat Benchmarks** mein per-unit rates compare kar sakte hain.`;
+  }
+
+  // English default
   if (q.includes('spend') || q.includes('how much') || q.includes('month')) {
     return `In **October 2026**, **${ctx.businessName}** recorded **${ctx.currentMonthSpend}** in total purchasing expenditure, compared with **${ctx.prevMonthSpend}** in September 2026 (${ctx.momChangePercent > 0 ? '+' : ''}${ctx.momChangePercent} month-over-month).
 
