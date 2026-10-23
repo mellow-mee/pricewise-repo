@@ -44,8 +44,10 @@ export default function App() {
 
   // Sync route with browser history
   const navigateTo = useCallback((route: string) => {
-    setCurrentRoute(route);
-    if (window.location.pathname !== route) {
+    const pathOnly = route.split('?')[0];
+    const valid = ['/', '/scan', '/ledger', '/save-more', '/ask'];
+    setCurrentRoute(valid.includes(pathOnly) ? pathOnly : '/');
+    if (window.location.pathname + window.location.search !== route) {
       window.history.pushState({}, '', route);
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });

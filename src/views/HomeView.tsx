@@ -1,3 +1,8 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React, { useMemo } from 'react';
 import {
   Business,
@@ -17,6 +22,8 @@ import {
   CheckCircle2,
   Receipt as ReceiptIcon,
   ChevronRight,
+  FileCheck,
+  Sparkles,
 } from 'lucide-react';
 
 interface HomeViewProps {
@@ -32,318 +39,337 @@ export const HomeView: React.FC<HomeViewProps> = ({
   opportunities,
   onNavigate,
 }) => {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
   const isHi = language === 'hi';
-
-  // Time-appropriate greeting
-  const greeting = useMemo(() => {
-    const hour = new Date().getHours();
-    if (isHi) {
-      if (hour < 12) return 'Shubh Prabhat';
-      if (hour < 17) return 'Shubh Dopahar';
-      return 'Shubh Sandhya';
-    }
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
-  }, [isHi]);
-
-  const ownerName = business?.ownerName || (isHi ? 'Dukaandar' : 'Store Owner');
-  const businessName = business?.name || 'Green Basket Stores';
 
   // Derived spending summary
   const summary = useMemo(() => {
     return calculateSpendingSummary(receipts, opportunities);
   }, [receipts, opportunities]);
 
-  // Priority insights written in simple, layman-friendly language
-  // Priority insights written in simple, business-friendly language
-  const insights = useMemo(() => {
-    const list = [];
-    const meaningfulOpps = opportunities.filter((o) => o.state === 'meaningful_opportunity');
+  // Current month receipts (October 2026 or active month)
+  const currentMonthReceipts = useMemo(() => {
+    return receipts.filter((r) => r.transactionDate?.startsWith('2026-10'));
+  }, [receipts]);
 
-    if (meaningfulOpps.length > 0) {
-      const topOpp = meaningfulOpps[0];
-      list.push({
-        id: 'opp-top',
-        type: 'opportunity',
-        title: isHi
-          ? `${topOpp.productName} — Bachat ka Mauka`
-          : `${topOpp.productName} — Possible Savings`,
-        description: isHi
-          ? `Aap per ${topOpp.unit} ${formatINR(topOpp.currentRecordedPriceMinor)} chuka rahe hain, jabki bazaar ka median rate lagbhag ${formatINR(topOpp.benchmarkMedianPriceMinor)} hai. Aap lagbhag ${formatINR(topOpp.estimatedPotentialSavingsMinor)} bacha sakte hain.`
-          : `You pay ${formatINR(topOpp.currentRecordedPriceMinor)} per ${topOpp.unit}, while nearby stores pay about ${formatINR(topOpp.benchmarkMedianPriceMinor)}. You could save around ${formatINR(topOpp.estimatedPotentialSavingsMinor)}.`,
-        actionLabel: isHi ? 'Rates Compare Karein' : 'Compare Prices',
-        route: '/save-more',
-      });
-    }
+  // Recorded count (confirmed & successfully saved receipts)
+  const recordedCount = useMemo(() => {
+    return receipts.filter((r) => r.status === 'confirmed').length;
+  }, [receipts]);
 
-    if (summary.monthOverMonthChangePercentage !== 0) {
-      const isUp = summary.monthOverMonthChangePercentage > 0;
-      list.push({
-        id: 'mom-trend',
-        type: isUp ? 'alert' : 'positive',
-        title: isHi
-          ? `Kharcha ${isUp ? 'badha' : 'ghata'} ${Math.abs(summary.monthOverMonthChangePercentage)}% se`
-          : `Spending ${isUp ? 'went up' : 'went down'} by ${Math.abs(summary.monthOverMonthChangePercentage)}%`,
-        description: isHi
-          ? `Is mahine aapka kharcha ${formatINR(summary.currentMonthSpendingMinor)} raha, pichhle mahine ${formatINR(summary.previousMonthSpendingMinor)} ke mukable.`
-          : `You spent ${formatINR(summary.currentMonthSpendingMinor)} this month compared to ${formatINR(summary.previousMonthSpendingMinor)} last month.`,
-        actionLabel: isHi ? 'Khate Mein Dekhein' : 'View in Ledger',
-        route: '/ledger',
-      });
-    }
+  // Needs review count
+  const needsReviewCount = useMemo(() => {
+    return receipts.filter(
+      (r) =>
+        r.status === 'pending_review' ||
+        r.reviewStatus === 'needs_review' ||
+        r.items.some((it) => it.reviewFlags && it.reviewFlags.length > 0)
+    ).length;
+  }, [receipts]);
 
-    const competitive = opportunities.find((o) => o.state === 'already_competitive');
-    if (competitive) {
-      list.push({
-        id: 'competitive-tea',
-        type: 'positive',
-        title: isHi
-          ? `${competitive.productName} ke rates bilkul sahi hain`
-          : `${competitive.productName} has good pricing`,
-        description: isHi
-          ? `Aapka khareed rate local wholesale market ke average (${formatINR(competitive.benchmarkMedianPriceMinor)}) ke barabar ya kam hai.`
-          : `Your purchase price is at or below the local market average (${formatINR(competitive.benchmarkMedianPriceMinor)}). Keep it up!`,
-        actionLabel: isHi ? 'Rate Check Karein' : 'Check Price',
-        route: '/save-more',
-      });
-    }
-
-    return list.slice(0, 3);
-  }, [opportunities, summary, isHi]);
-
-  // Recent 5 receipts
+  // Recent 5 purchases
   const recentReceipts = useMemo(() => {
     return receipts.slice(0, 5);
   }, [receipts]);
 
   return (
-    <div className="space-y-6 pb-20 md:pb-12">
-      {/* 1. Header Greeting */}
-      <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+    <div className="space-y-6 pb-24 md:pb-14">
+      {/* A. Header */}
+      <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#25382D]">
-            {greeting}, {ownerName}
+          <h1 className="text-2xl sm:text-[28px] font-bold tracking-tight text-[#202B27]">
+            {isHi ? 'Dukaan Overview' : 'Business overview'}
           </h1>
-          <p className="text-sm text-[#64756A] mt-0.5">
-            {businessName} · {isHi ? 'Is mahine aapki dukaan ke kharche aur bachat ka pura hisaab-kitab:' : 'Here is how your store spending looks this month.'}
+          <p className="text-sm sm:text-base text-[#65736C] mt-0.5">
+            {isHi
+              ? 'Aapke kharche, purchase records aur bachat ke avasar.'
+              : 'Your purchases, records and savings opportunities.'}
           </p>
         </div>
+
+        {business?.name && (
+          <div className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EAF4ED] border border-[#CDE8D8] text-xs font-medium text-[#216747]">
+            <span className="w-2 h-2 rounded-full bg-[#216747]"></span>
+            <span>{business.name}</span>
+          </div>
+        )}
       </section>
 
-      {/* 2. Primary Spending Card */}
-      <section className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-5 sm:p-7 shadow-xs">
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-          <div className="space-y-4 max-w-xl">
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#64756A]">
-              {isHi ? 'Is Mahine Ka Kharcha · October 2026' : "This Month's Spending · October 2026"}
-            </span>
+      {/* B. Card 1 — Total Purchases This Month (Full-width Forest Green Hero) */}
+      <section
+        aria-label="Total purchases this month"
+        className="bg-[#216747] text-white rounded-2xl p-6 sm:p-7 shadow-xs relative overflow-hidden transition-all"
+      >
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 relative z-10">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-[#EAF4ED]/90 text-sm font-medium">
+              <ReceiptIcon className="w-4 h-4 text-[#A8D7B8]" />
+              <span>
+                {isHi ? 'Is Mahine Ka Kharcha' : 'Total purchases this month'}
+              </span>
+            </div>
 
             <div className="flex items-baseline gap-3 flex-wrap">
               <CurrencyDisplay
                 amountMinor={summary.currentMonthSpendingMinor}
-                className="text-3xl sm:text-4xl font-bold text-[#25382D] tracking-tight"
+                className="text-3xl sm:text-4xl font-bold tracking-tight text-white tabular-nums"
               />
-              <span className="text-xs text-[#64756A]">
-                {isHi ? 'dukaan saman aur vendor payments par kharch' : 'spent on store supplies & bills'}
+              <span className="text-xs sm:text-sm text-[#EAF4ED]/80 font-normal">
+                {isHi
+                  ? `· ${currentMonthReceipts.length || receipts.length} bills is mahine darj hue`
+                  : `· ${currentMonthReceipts.length || receipts.length} bills recorded this month`}
               </span>
             </div>
 
-            {summary.hasEnoughBenchmarkData && summary.benchmarkSpendingMinor !== null ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2 border-t border-[#E2E7E2]">
-                <div className="bg-[#F7F8F5] rounded-xl p-3.5 border border-[#E2E7E2]">
-                  <span className="text-xs text-[#64756A] block">
-                    {isHi ? 'Regional Bazaar Thok Bhaav' : 'Market Average (Similar Stores)'}
-                  </span>
-                  <CurrencyDisplay
-                    amountMinor={summary.benchmarkSpendingMinor}
-                    className="text-xl font-bold text-[#25382D] mt-0.5 block"
-                  />
-                  <span className="text-[11px] text-[#64756A] mt-1 block">
-                    {isHi ? 'Area ki 5+ dukaano ke verified data par aadharit' : 'Based on 5+ local stores in your area'}
-                  </span>
-                </div>
-
-                <div className="bg-[#EDF7F1] rounded-xl p-3.5 border border-[#CDE8D8]">
-                  <span className="text-xs text-[#2E7D4F] font-medium block">
-                    {isHi ? 'Sambhavit Kul Bachat' : 'Estimated Possible Savings'}
-                  </span>
-                  <div className="flex items-baseline gap-2 mt-0.5">
-                    <CurrencyDisplay
-                      amountMinor={summary.potentialDifferenceMinor || 0}
-                      className="text-xl font-bold text-[#2E7D4F]"
-                    />
-                    {summary.differencePercentage !== null && summary.differencePercentage > 0 && (
-                      <span className="text-xs font-semibold text-[#2E7D4F]">
-                        ({summary.differencePercentage}%)
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[11px] text-[#2E7D4F] mt-1 block">
-                    {isHi ? 'Anumanit bachat, rate negotiation par nirbhar' : 'Potential savings, not guaranteed'}
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-[#FDF8F0] border border-[#F3E2CE] rounded-xl p-3.5 text-xs text-[#C0772C]">
-                <span className="font-semibold block mb-0.5">
-                  {isHi ? 'Abhi peer data kam hai' : 'Not enough store data yet'}
-                </span>
-                {isHi
-                  ? 'Bhaav compare karne ke liye Pricewise ko kam se kam 5 dukaano ka verified data chahiye.'
-                  : 'Pricewise needs data from at least 5 local stores before comparing prices.'}
-              </div>
-            )}
-
-            <p className="text-xs text-[#64756A] leading-relaxed">
-              {summary.potentialDifferenceMinor && summary.potentialDifferenceMinor > 0
-                ? isHi
-                  ? `Packaging aur store supplies par local market median rates match karke aap lagbhag ${formatINR(summary.potentialDifferenceMinor)} (${summary.differencePercentage}%) tak bacha sakte hain.`
-                  : `You could potentially save ${formatINR(summary.potentialDifferenceMinor)} (${summary.differencePercentage}%) by matching local market prices on packaging and supplies.`
-                : isHi
-                  ? 'Aapke khareed rates local bazaar ke median average ke bilkul barabar hain.'
-                  : 'Your current purchase prices are close to the local market average.'}
+            <p className="text-xs sm:text-sm text-[#EAF4ED]/85 leading-relaxed max-w-xl">
+              {summary.monthOverMonthChangePercentage !== 0 ? (
+                isHi ? (
+                  <>
+                    Pichhle mahine ke mukable kharcha{' '}
+                    <span className="font-semibold text-white">
+                      {Math.abs(summary.monthOverMonthChangePercentage)}%{' '}
+                      {summary.monthOverMonthChangePercentage > 0 ? 'badha' : 'ghata'}
+                    </span>
+                    . Sabhi vendor payments ledger mein surakshit hain.
+                  </>
+                ) : (
+                  <>
+                    Spending{' '}
+                    <span className="font-semibold text-white">
+                      {summary.monthOverMonthChangePercentage > 0 ? 'increased' : 'decreased'} by{' '}
+                      {Math.abs(summary.monthOverMonthChangePercentage)}%
+                    </span>{' '}
+                    compared to last month. All vendor records are verified in your ledger.
+                  </>
+                )
+              ) : (
+                isHi
+                  ? 'Aapke sabhi dukaani kharche aur vendor invoices yahan darj hain.'
+                  : 'All your store purchase transactions and vendor invoices are tracked here.'
+              )}
             </p>
           </div>
 
-          {/* Quick Action Box */}
-          <div className="lg:w-72 bg-[#F7F8F5] rounded-xl p-4 border border-[#E2E7E2] space-y-3 shrink-0">
-            <span className="text-xs font-semibold text-[#25382D] block">
-              {isHi ? 'Dukaan Khata Status' : 'Store Status'}
-            </span>
-            <ul className="text-xs text-[#64756A] space-y-2">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#2E7D4F] shrink-0" />
-                <span>{isHi ? '6 mahine ka kharcha record active' : '6 months of purchase records'}</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#2E7D4F] shrink-0" />
-                <span>{receipts.length} {isHi ? 'verified bills darj hain' : 'bills and receipts saved'}</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#2E7D4F] shrink-0" />
-                <span>{isHi ? 'Collective thok bhaav network chalu' : 'Community price sharing on'}</span>
-              </li>
-            </ul>
+          <div className="shrink-0 self-start md:self-center">
             <button
-              onClick={() => onNavigate('/save-more')}
-              className="w-full mt-2 inline-flex items-center justify-between px-3 py-2 rounded-lg bg-[#FFFFFF] border border-[#E2E7E2] text-xs font-medium text-[#25382D] hover:bg-[#DCE7DD] transition-colors cursor-pointer"
+              onClick={() => onNavigate('/ledger')}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 active:bg-white/30 border border-white/25 text-white text-xs sm:text-sm font-semibold transition-all cursor-pointer backdrop-blur-xs min-h-[44px]"
             >
-              <span>{isHi ? 'Bachat Bhaav Dekhein' : 'See Market Prices'}</span>
-              <ArrowRight className="w-3.5 h-3.5 text-[#476C58]" />
+              <span>{isHi ? 'Purchase Ledger Dekhein' : 'View purchase ledger'}</span>
+              <ArrowRight className="w-4 h-4 text-white" />
             </button>
           </div>
         </div>
       </section>
 
-      {/* 3. Priority Insights */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-[#25382D]">
-            {isHi ? 'Zaroori Kharcha & Bachat Sujhav' : 'Helpful Spending Insights'}
-          </h2>
-          <span className="text-xs text-[#64756A]">
-            {isHi ? 'Aapke verified bills ke mutabiq' : 'Based on your saved bills'}
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {insights.map((insight) => (
-            <div
-              key={insight.id}
-              className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-xl p-4 flex flex-col justify-between hover:border-[#476C58] transition-colors"
-            >
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  {insight.type === 'opportunity' ? (
-                    <TrendingDown className="w-4 h-4 text-[#C0772C]" />
-                  ) : insight.type === 'alert' ? (
-                    <AlertCircle className="w-4 h-4 text-[#C0772C]" />
-                  ) : (
-                    <CheckCircle2 className="w-4 h-4 text-[#2E7D4F]" />
-                  )}
-                  <span className="text-xs font-semibold text-[#25382D]">{insight.title}</span>
-                </div>
-                <p className="text-xs text-[#64756A] leading-relaxed">{insight.description}</p>
+      {/* C. Card 2 — Possible Savings (Full-width Pale Green Card) */}
+      <section
+        aria-label="Possible savings"
+        className="bg-[#EAF4ED] border border-[#CDE8D8] rounded-2xl p-5 sm:p-6 shadow-xs transition-all"
+      >
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-[#216747]/10 flex items-center justify-center shrink-0">
+                <TrendingDown className="w-4 h-4 text-[#216747]" />
               </div>
-
-              <button
-                onClick={() => onNavigate(insight.route)}
-                className="mt-4 pt-3 border-t border-[#E2E7E2] flex items-center justify-between text-xs font-medium text-[#476C58] hover:text-[#25382D] cursor-pointer"
-              >
-                <span>{insight.actionLabel}</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
+              <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-[#216747]">
+                {isHi ? 'Sambhavit Bachat' : 'Possible savings'}
+              </span>
             </div>
-          ))}
+
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <CurrencyDisplay
+                amountMinor={summary.potentialDifferenceMinor || 0}
+                className="text-2xl sm:text-[32px] font-bold text-[#216747] tabular-nums tracking-tight"
+              />
+              {summary.differencePercentage !== null && summary.differencePercentage > 0 && (
+                <span className="text-xs sm:text-sm font-semibold text-[#216747] bg-white/70 px-2 py-0.5 rounded-md border border-[#CDE8D8]">
+                  {isHi ? `Lagbhag ${summary.differencePercentage}% bachat` : `~${summary.differencePercentage}% opportunity`}
+                </span>
+              )}
+            </div>
+
+            <p className="text-xs sm:text-sm text-[#355B45] leading-relaxed max-w-2xl">
+              {isHi
+                ? 'Bazaar rates ki tulna se anumanit bachat avasar. Ye anumanit bachat hai jo samaan dukaano ke thok bhaav par aadharit hai.'
+                : 'Estimated opportunity from price comparisons. Based on purchase prices from similar stores in your region.'}
+            </p>
+          </div>
+
+          <div className="shrink-0 self-start md:self-center">
+            <button
+              onClick={() => onNavigate('/save-more')}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#216747] hover:bg-[#1a5339] active:bg-[#15422d] text-white text-xs sm:text-sm font-semibold transition-colors shadow-xs cursor-pointer min-h-[44px]"
+            >
+              <Sparkles className="w-4 h-4 text-[#A8D7B8]" />
+              <span>{isHi ? 'Bachat Avasar Dekhein' : 'Explore savings opportunities'}</span>
+              <ArrowRight className="w-4 h-4 text-white" />
+            </button>
+          </div>
         </div>
       </section>
 
-      {/* 4. Recent Activity */}
-      <section className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-5 sm:p-7 shadow-xs space-y-4">
+      {/* D. Card 3 (Bills Recorded) & Card 4 (Needs Review) — Side-by-Side on Desktop */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+        {/* Card 3: Bills Recorded */}
+        <div
+          onClick={() => onNavigate('/ledger')}
+          className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-5 sm:p-6 shadow-xs hover:border-[#216747]/40 hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between space-y-4"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-[#65736C]">
+              {isHi ? 'Darj kiye gaye Bills' : 'Bills recorded'}
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-[#EAF4ED] text-[#216747] flex items-center justify-center shrink-0">
+              <FileCheck className="w-5 h-5 text-[#216747]" />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <span className="text-2xl sm:text-3xl font-bold text-[#202B27] tabular-nums block">
+              {recordedCount || receipts.length}
+            </span>
+            <div className="flex items-center gap-1.5 text-xs font-medium text-[#216747]">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>{isHi ? 'Safaltapoorvak saved' : 'Successfully saved'}</span>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-[#E2E7E2]/60 flex items-center justify-between text-xs font-semibold text-[#216747]">
+            <span>{isHi ? 'Ledger mein dekhein' : 'View in ledger'}</span>
+            <ChevronRight className="w-4 h-4" />
+          </div>
+        </div>
+
+        {/* Card 4: Needs Review */}
+        <div
+          onClick={() => onNavigate('/ledger?filter=needs_review')}
+          className="bg-[#FFF3D8] border border-[#F3E2CE] rounded-2xl p-5 sm:p-6 shadow-xs hover:border-[#E8C896] hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between space-y-4 text-[#754A0A]"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-[#754A0A]">
+              {isHi ? 'Review ki Zaroorat' : 'Needs review'}
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-[#FFE7B3] text-[#754A0A] flex items-center justify-center shrink-0">
+              <AlertCircle className="w-5 h-5 text-[#754A0A]" />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <span className="text-2xl sm:text-3xl font-bold text-[#754A0A] tabular-nums block">
+              {needsReviewCount}
+            </span>
+            <div className="flex items-center gap-1.5 text-xs font-medium text-[#754A0A]">
+              <span>
+                {needsReviewCount === 0
+                  ? isHi
+                    ? 'Sabhi bills reconciled'
+                    : 'All records clear'
+                  : isHi
+                  ? 'Details check karein'
+                  : 'Check details'}
+              </span>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-[#F3E2CE] flex items-center justify-between text-xs font-semibold text-[#754A0A]">
+            <span>{isHi ? 'Review items filter karein' : 'Filter review items'}</span>
+            <ChevronRight className="w-4 h-4" />
+          </div>
+        </div>
+      </section>
+
+      {/* E. Section 5 — Recent Purchases */}
+      <section
+        aria-label="Recent purchases"
+        className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-2xl p-5 sm:p-7 shadow-xs space-y-4"
+      >
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-[#25382D]">
-              {isHi ? 'Haal hi ke Bills & Invoices' : 'Recent Bills & Invoices'}
+            <h2 className="text-base sm:text-lg font-bold text-[#202B27]">
+              {isHi ? 'Haal hi ke Purchases' : 'Recent purchases'}
             </h2>
-            <p className="text-xs text-[#64756A]">
-              {isHi ? 'Khate mein darj aakhiri purchases' : 'Latest purchases added to your ledger'}
+            <p className="text-xs text-[#65736C] mt-0.5">
+              {isHi
+                ? 'Khate mein darj aakhiri purchases aur invoices'
+                : 'Latest purchases added to your ledger'}
             </p>
           </div>
+
           <button
             onClick={() => onNavigate('/ledger')}
-            className="text-xs font-semibold text-[#476C58] hover:text-[#25382D] flex items-center gap-1 cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#216747] hover:text-[#1a5339] hover:underline cursor-pointer transition-colors"
           >
-            <span>{isHi ? 'Saare bills dekhein' : 'View all bills'}</span>
+            <span>{isHi ? 'Sabhi Dekhein' : 'View all'}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
         <div className="divide-y divide-[#E2E7E2]">
-          {recentReceipts.map((rec) => (
-            <div
-              key={rec.id}
-              onClick={() => onNavigate('/ledger')}
-              className="py-3 flex items-center justify-between gap-4 hover:bg-[#F7F8F5] px-2 rounded-lg transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-lg bg-[#DCE7DD] text-[#476C58] flex items-center justify-center shrink-0">
-                  <ReceiptIcon className="w-4 h-4" />
-                </div>
-                <div className="min-w-0">
-                  <span className="text-sm font-semibold text-[#25382D] block truncate">
-                    {rec.merchantName}
-                  </span>
-                  <div className="flex items-center gap-2 text-xs text-[#64756A]">
-                    <span>{rec.transactionDate}</span>
-                    <span>·</span>
-                    <span>
-                      {rec.items.length} {isHi ? 'items' : rec.items.length === 1 ? 'item' : 'items'}
+          {recentReceipts.map((rec) => {
+            const isPending =
+              rec.status === 'pending_review' ||
+              rec.reviewStatus === 'needs_review' ||
+              rec.items.some((it) => it.reviewFlags && it.reviewFlags.length > 0);
+
+            return (
+              <div
+                key={rec.id}
+                onClick={() => onNavigate('/ledger')}
+                className="py-3.5 flex items-center justify-between gap-3 sm:gap-4 hover:bg-[#F5F7F6] px-2.5 rounded-xl transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#EAF4ED] text-[#216747] flex items-center justify-center shrink-0">
+                    <ReceiptIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-sm sm:text-base font-semibold text-[#202B27] block truncate">
+                      {rec.merchantName}
                     </span>
-                    {rec.invoiceNumber && (
-                      <>
-                        <span>·</span>
-                        <span className="font-mono">{rec.invoiceNumber}</span>
-                      </>
-                    )}
+                    <div className="flex items-center gap-2 text-xs text-[#65736C] flex-wrap mt-0.5">
+                      <span>{rec.transactionDate}</span>
+                      <span>·</span>
+                      <span>
+                        {rec.items.length}{' '}
+                        {isHi
+                          ? 'items'
+                          : rec.items.length === 1
+                          ? 'item'
+                          : 'items'}
+                      </span>
+                      {rec.invoiceNumber && (
+                        <>
+                          <span>·</span>
+                          <span className="font-mono text-[#65736C]">
+                            {rec.invoiceNumber}
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="text-right shrink-0">
-                <CurrencyDisplay
-                  amountMinor={rec.totalMinor}
-                  className="text-sm font-bold text-[#25382D] block"
-                />
-                <span className="text-[11px] text-[#2E7D4F] font-medium">
-                  {rec.status === 'confirmed'
-                    ? isHi ? 'Verified Bill' : 'Confirmed'
-                    : isHi ? 'Check Karein' : 'Needs Review'}
-                </span>
+                <div className="text-right shrink-0 flex flex-col items-end gap-1">
+                  <CurrencyDisplay
+                    amountMinor={rec.totalMinor}
+                    className="text-sm sm:text-base font-bold text-[#202B27] tabular-nums block"
+                  />
+                  {isPending ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#754A0A] bg-[#FFF3D8] border border-[#F3E2CE] px-2 py-0.5 rounded-md">
+                      <AlertCircle className="w-3 h-3 text-[#754A0A]" />
+                      <span>{isHi ? 'Review Baaqi' : 'Needs Review'}</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#216747] bg-[#EAF4ED] border border-[#CDE8D8] px-2 py-0.5 rounded-md">
+                      <CheckCircle2 className="w-3 h-3 text-[#216747]" />
+                      <span>{isHi ? 'Confirmed' : 'Confirmed'}</span>
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
     </div>

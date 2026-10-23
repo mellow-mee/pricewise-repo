@@ -61,8 +61,23 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedSupplier, setSelectedSupplier] = useState<string>('all');
   const [periodFilter, setPeriodFilter] = useState<'all' | 'oct_2026' | 'sep_2026' | 'last_90_days'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'confirmed' | 'needs_review'>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('filter') === 'needs_review') return 'needs_review';
+    }
+    return 'all';
+  });
   const [sortField, setSortField] = useState<'date' | 'total'>('date');
   const [sortAsc, setSortAsc] = useState(false);
+
+  // Sync status filter if URL changes
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('filter') === 'needs_review') {
+      setStatusFilter('needs_review');
+    }
+  }, []);
 
   // Modals state
   const [viewingReceipt, setViewingReceipt] = useState<Receipt | null>(null);
@@ -104,6 +119,17 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
           return false;
         }
 
+        // Status filter
+        if (statusFilter === 'needs_review') {
+          const isReview =
+            rec.status === 'pending_review' ||
+            rec.reviewStatus === 'needs_review' ||
+            rec.items.some((it) => it.reviewFlags && it.reviewFlags.length > 0);
+          if (!isReview) return false;
+        } else if (statusFilter === 'confirmed') {
+          if (rec.status !== 'confirmed') return false;
+        }
+
         // Period filter
         if (periodFilter === 'oct_2026' && !rec.transactionDate.startsWith('2026-10')) {
           return false;
@@ -128,7 +154,7 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
           return sortAsc ? -diff : diff;
         }
       });
-  }, [receipts, searchQuery, selectedCategory, selectedSupplier, periodFilter, sortField, sortAsc]);
+  }, [receipts, searchQuery, selectedCategory, selectedSupplier, statusFilter, periodFilter, sortField, sortAsc]);
 
   // Aggregate stats for the current filter selection
   const filteredTotalSpend = useMemo(() => {
@@ -136,7 +162,12 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
   }, [filteredReceipts]);
 
   const pendingReviewCount = useMemo(() => {
-    return receipts.filter((r) => r.status === 'pending_review').length;
+    return receipts.filter(
+      (r) =>
+        r.status === 'pending_review' ||
+        r.reviewStatus === 'needs_review' ||
+        r.items.some((it) => it.reviewFlags && it.reviewFlags.length > 0)
+    ).length;
   }, [receipts]);
 
   // Reset all filters
@@ -145,6 +176,7 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
     setSelectedCategory('all');
     setSelectedSupplier('all');
     setPeriodFilter('all');
+    setStatusFilter('all');
   };
 
   // Delete transaction action
@@ -201,35 +233,17 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
         </button>
       </div>
 
-      {/* 2. Year-wise Monthly Expenditure Graph */}
-      <section aria-label="Yearly Expenditure Graph">
-        <YearlyExpenditureGraph
-          receipts={receipts}
-          selectedYear={spreadsheetYear}
-          onYearChange={setSpreadsheetYear}
-          selectedMonth={spreadsheetMonth}
-          onMonthSelect={setSpreadsheetMonth}
-        />
-      </section>
-
-      {/* 3. Monthly Spending Spreadsheet Subsection */}
-      <section aria-label="Monthly Spending Spreadsheet">
-        <MonthlySpreadsheet
-          receipts={receipts}
-          selectedYear={spreadsheetYear}
-          onYearChange={setSpreadsheetYear}
-          selectedMonth={spreadsheetMonth}
-          onMonthChange={setSpreadsheetMonth}
-        />
-      </section>
-
-      {/* 4. Past Transactions Subsection */}
-      <section className="space-y-4 pt-4 border-t border-[#E2E7E2]" aria-label="Past Transactions">
+      {/* 2. Online Purchase Ledger */}
+      <section className="space-y-4" aria-label="Online Purchase Ledger">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h2 className="text-xl font-bold text-[#25382D]">Past Transactions</h2>
-            <p className="text-xs text-[#64756A] mt-0.5">
-              All uploaded receipts, invoices, and verified ledger entries.
+            <h2 className="text-xl font-bold text-[#202B27]">
+              {isHi ? 'Online Purchase Ledger' : 'Online Purchase Ledger'}
+            </h2>
+            <p className="text-xs text-[#65736C] mt-0.5">
+              {isHi
+                ? 'Sabhi uploaded receipts, invoices aur verified ledger entries.'
+                : 'All uploaded receipts, invoices, and verified digital ledger entries.'}
             </p>
           </div>
         </div>
@@ -257,13 +271,27 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
           </span>
         </div>
 
-        <div className="bg-[#FFFFFF] border border-[#E2E7E2] rounded-xl p-4">
-          <span className="text-xs text-[#64756A] block">Awaiting Review</span>
-          <span className="text-2xl font-bold text-[#25382D] font-mono mt-0.5 block">
+        <div
+          onClick={() => setStatusFilter(statusFilter === 'needs_review' ? 'all' : 'needs_review')}
+          className={`border rounded-xl p-4 cursor-pointer transition-all ${
+            statusFilter === 'needs_review'
+              ? 'bg-[#FFF3D8] border-[#E8C896] ring-2 ring-[#754A0A]/20'
+              : 'bg-[#FFFFFF] border-[#E2E7E2] hover:border-[#E8C896]'
+          }`}
+          title="Click to toggle filter for review items"
+        >
+          <span className="text-xs text-[#64756A] block">
+            {isHi ? 'Review Baaqi' : 'Awaiting Review'}
+          </span>
+          <span className="text-2xl font-bold text-[#754A0A] font-mono mt-0.5 block">
             {pendingReviewCount}
           </span>
-          <span className="text-[11px] text-[#2E7D4F] mt-1 block">
-            {pendingReviewCount === 0 ? 'All receipts reconciled' : 'Action recommended'}
+          <span className="text-[11px] text-[#754A0A] mt-1 block">
+            {statusFilter === 'needs_review'
+              ? (isHi ? '✓ Filter active (Click to clear)' : '✓ Filter active (Click to clear)')
+              : pendingReviewCount === 0
+              ? (isHi ? 'Sabhi bills reconciled' : 'All receipts reconciled')
+              : (isHi ? 'Click karke filter karein' : 'Click to filter review items')}
           </span>
         </div>
       </div>
@@ -320,6 +348,23 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
                 {s}
               </option>
             ))}
+          </select>
+
+          {/* Status Filter */}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as any)}
+            className={`px-3 py-2 text-xs rounded-xl border font-medium focus:outline-hidden ${
+              statusFilter === 'needs_review'
+                ? 'border-[#E8C896] bg-[#FFF3D8] text-[#754A0A]'
+                : 'border-[#E2E7E2] bg-[#F7F8F5] text-[#25382D] focus:border-[#476C58]'
+            }`}
+          >
+            <option value="all">{isHi ? 'Sabhi Status' : 'All Statuses'}</option>
+            <option value="confirmed">{isHi ? 'Verified Bills' : 'Confirmed'}</option>
+            <option value="needs_review">
+              {isHi ? `Review ki Zaroorat (${pendingReviewCount})` : `Needs Review (${pendingReviewCount})`}
+            </option>
           </select>
 
           {/* Time Range Filter */}
@@ -542,6 +587,40 @@ export const LedgerView: React.FC<LedgerViewProps> = ({
           </div>
         </>
       )}
+      </section>
+
+      {/* 3. Year-wise Monthly Expenditure Graph & Analytics */}
+      <section className="space-y-4 pt-8 border-t border-[#E2E7E2]" aria-label="Yearly Expenditure Graph">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h2 className="text-xl font-bold text-[#202B27]">
+              {isHi ? 'Kharche Ka Varshik Vishleshan' : 'Yearly Expenditure Analysis'}
+            </h2>
+            <p className="text-xs text-[#65736C] mt-0.5">
+              {isHi
+                ? 'Mahina-dar-mahina kharche ka graph aur category trend.'
+                : 'Month-by-month spending trends and historical patterns.'}
+            </p>
+          </div>
+        </div>
+        <YearlyExpenditureGraph
+          receipts={receipts}
+          selectedYear={spreadsheetYear}
+          onYearChange={setSpreadsheetYear}
+          selectedMonth={spreadsheetMonth}
+          onMonthSelect={setSpreadsheetMonth}
+        />
+      </section>
+
+      {/* 4. Monthly Spending Spreadsheet Subsection */}
+      <section aria-label="Monthly Spending Spreadsheet">
+        <MonthlySpreadsheet
+          receipts={receipts}
+          selectedYear={spreadsheetYear}
+          onYearChange={setSpreadsheetYear}
+          selectedMonth={spreadsheetMonth}
+          onMonthChange={setSpreadsheetMonth}
+        />
       </section>
 
       {/* --- DETAIL MODAL --- */}
