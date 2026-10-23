@@ -1,0 +1,6 @@
+{
+  "name": "Pricewise",
+  "description": "Purchasing intelligence platform for businesses: receipt scanning, expense ledger, collective price benchmarks, and AI assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

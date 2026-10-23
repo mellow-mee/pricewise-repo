@@ -1,0 +1,114 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React from 'react';
+import {
+  LayoutDashboard,
+  ScanLine,
+  ReceiptText,
+  TrendingDown,
+  Sparkles,
+} from 'lucide-react';
+
+interface BottomNavProps {
+  currentRoute: string;
+  onRouteChange: (route: string) => void;
+}
+
+export const BottomNav: React.FC<BottomNavProps> = ({ currentRoute, onRouteChange }) => {
+  return (
+    <nav
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#FFFFFF] border-t border-[#E2E7E2] px-2 py-1.5 pb-safe shadow-lg"
+      aria-label="Mobile Navigation"
+    >
+      <div className="flex items-center justify-around">
+        {/* 1. Home */}
+        <button
+          onClick={() => onRouteChange('/')}
+          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer min-w-[56px] min-h-[48px] ${
+            currentRoute === '/'
+              ? 'text-[#476C58]'
+              : 'text-[#64756A] hover:text-[#25382D]'
+          }`}
+          aria-label="Home Dashboard"
+          aria-current={currentRoute === '/' ? 'page' : undefined}
+        >
+          <LayoutDashboard className={`w-5 h-5 mb-0.5 ${currentRoute === '/' ? 'stroke-[2.5]' : ''}`} />
+          <span className="text-[11px]">Home</span>
+        </button>
+
+        {/* 2. Ledger */}
+        <button
+          onClick={() => onRouteChange('/ledger')}
+          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer min-w-[56px] min-h-[48px] ${
+            currentRoute === '/ledger'
+              ? 'text-[#476C58]'
+              : 'text-[#64756A] hover:text-[#25382D]'
+          }`}
+          aria-label="Expense Ledger"
+          aria-current={currentRoute === '/ledger' ? 'page' : undefined}
+        >
+          <ReceiptText className={`w-5 h-5 mb-0.5 ${currentRoute === '/ledger' ? 'stroke-[2.5]' : ''}`} />
+          <span className="text-[11px]">Ledger</span>
+        </button>
+
+        {/* 3. Central Scan Action */}
+        <button
+          onClick={() => onRouteChange('/scan')}
+          className={`flex flex-col items-center justify-center -mt-4 transition-transform active:scale-95 cursor-pointer`}
+          aria-label="Scan Receipt or Invoice"
+          aria-current={currentRoute === '/scan' ? 'page' : undefined}
+        >
+          <div
+            className={`w-13 h-13 rounded-full flex items-center justify-center shadow-md transition-colors ${
+              currentRoute === '/scan'
+                ? 'bg-[#25382D] text-white ring-4 ring-[#DCE7DD]'
+                : 'bg-[#476C58] text-white hover:bg-[#3a5948] ring-4 ring-[#FFFFFF]'
+            }`}
+          >
+            <ScanLine className="w-6 h-6 stroke-[2.2]" />
+          </div>
+          <span
+            className={`text-[11px] mt-1 font-semibold ${
+              currentRoute === '/scan' ? 'text-[#25382D]' : 'text-[#476C58]'
+            }`}
+          >
+            Scan
+          </span>
+        </button>
+
+        {/* 4. Save More */}
+        <button
+          onClick={() => onRouteChange('/save-more')}
+          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer min-w-[56px] min-h-[48px] ${
+            currentRoute === '/save-more'
+              ? 'text-[#476C58]'
+              : 'text-[#64756A] hover:text-[#25382D]'
+          }`}
+          aria-label="Save More Benchmarks"
+          aria-current={currentRoute === '/save-more' ? 'page' : undefined}
+        >
+          <TrendingDown className={`w-5 h-5 mb-0.5 ${currentRoute === '/save-more' ? 'stroke-[2.5]' : ''}`} />
+          <span className="text-[11px]">Save More</span>
+        </button>
+
+        {/* 5. Ask Assistant */}
+        <button
+          onClick={() => onRouteChange('/ask')}
+          className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-xs font-medium transition-colors cursor-pointer min-w-[56px] min-h-[48px] ${
+            currentRoute === '/ask'
+              ? 'text-[#476C58]'
+              : 'text-[#64756A] hover:text-[#25382D]'
+          }`}
+          aria-label="Ask AI Assistant"
+          aria-current={currentRoute === '/ask' ? 'page' : undefined}
+        >
+          <Sparkles className={`w-5 h-5 mb-0.5 ${currentRoute === '/ask' ? 'stroke-[2.5]' : ''}`} />
+          <span className="text-[11px]">Ask</span>
+        </button>
+      </div>
+    </nav>
+  );
+};
