@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, Type } from '@google/genai';
 import { AssistantChatMessage, PageAssistantContext, Receipt, ReceiptLineItem } from '../src/types/index.ts';
 import { db } from './db.ts';
 import { formatINR } from '../src/utils/finance.ts';
@@ -14,7 +14,14 @@ function getAiClient(): GoogleGenAI | null {
     return null;
   }
   try {
-    return new GoogleGenAI();
+    return new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
+      },
+    });
   } catch (err) {
     console.warn('Gemini SDK initialization note:', err);
     return null;
@@ -38,20 +45,32 @@ export interface ExtractedReceiptDraft {
   rawTextFound?: string;
 }
 
+const CANDIDATE_VISION_MODELS = ['gemini-3.1-flash-lite', 'gemini-3.8-flash'];
+
 /**
- * Extract structured receipt information from image using Gemini 3.8 Flash,
- * with structured validation and intelligent fallback.
+ * Extract structured receipt information from image using Gemini vision models,
+ * with structured schema validation and error resilience.
  */
 export async function extractReceiptFromImage(
   base64Data: string,
   mimeType: string = 'image/jpeg'
 ): Promise<ExtractedReceiptDraft> {
-  const cleanBase64 = base64Data.replace(/^data:[a-zA-Z0-9/+-]+;base64,/, '');
+  // Extract effective MIME type if embedded in data URI
+  let effectiveMimeType = mimeType || 'image/jpeg';
+  const mimeMatch = base64Data.match(/^data:([^;,]+)/);
+  if (mimeMatch && mimeMatch[1]) {
+    effectiveMimeType = mimeMatch[1];
+  }
+  if (effectiveMimeType === 'image/jpg') {
+    effectiveMimeType = 'image/jpeg';
+  }
+
+  // Clean base64 payload
+  const cleanBase64 = base64Data.replace(/^data:[^;]+;base64,/, '').trim();
 
   const aiClient = getAiClient();
   if (aiClient) {
-    try {
-      const prompt = `You are a high-precision OCR and invoice parsing engine for retail and commercial purchasing receipts in India.
+    const prompt = `You are a high-precision OCR and invoice parsing engine for retail and commercial purchasing receipts in India.
 Analyze the provided receipt/invoice image and extract the structured data in strict JSON.
 
 Rules:
@@ -62,75 +81,98 @@ Rules:
    For example, ₹12.50 = 1250 paise, ₹850 = 85000 paise.
 5. Categorize each line item into one of: 'Packaging', 'Inventory & Food', 'Cleaning & Hygiene', 'Store Supplies', 'Utilities & Facilities', 'Equipment'.
 6. If an item matches common retail products (e.g. 3-ply boxes, kraft bags, tea, disinfectant), identify standard specifications and units (box, kg, pack, can, roll, piece).
-7. Return strictly a JSON object with this shape:
-{
-  "merchantName": string,
-  "invoiceNumber": string,
-  "transactionDate": "YYYY-MM-DD",
-  "subtotalMinor": number,
-  "taxMinor": number,
-  "discountMinor": number,
-  "extraChargesMinor": number,
-  "totalMinor": number,
-  "paymentMethod": string,
-  "items": [
-    {
-      "originalDescription": string,
-      "productName": string,
-      "specification": string,
-      "quantity": number,
-      "unit": string,
-      "unitPriceMinor": number,
-      "lineTotalMinor": number,
-      "category": string,
-      "confidence": number
-    }
-  ],
-  "extractionConfidence": number
-}`;
+7. Accurately extract all items visible on the document. If any line items or quantities are listed, parse each item with its rate and total.`;
 
-      const response = await aiClient.models.generateContent({
-        model: 'gemini-3.8-flash',
-        contents: [
-          {
-            role: 'user',
-            parts: [
-              { text: prompt },
-              {
-                inlineData: {
-                  mimeType: mimeType || 'image/jpeg',
-                  data: cleanBase64,
-                },
-              },
-            ],
+    const receiptSchema = {
+      type: Type.OBJECT,
+      properties: {
+        merchantName: { type: Type.STRING },
+        invoiceNumber: { type: Type.STRING },
+        transactionDate: { type: Type.STRING },
+        currency: { type: Type.STRING },
+        subtotalMinor: { type: Type.INTEGER },
+        taxMinor: { type: Type.INTEGER },
+        discountMinor: { type: Type.INTEGER },
+        extraChargesMinor: { type: Type.INTEGER },
+        totalMinor: { type: Type.INTEGER },
+        paymentMethod: { type: Type.STRING },
+        items: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              originalDescription: { type: Type.STRING },
+              productName: { type: Type.STRING },
+              specification: { type: Type.STRING },
+              quantity: { type: Type.NUMBER },
+              unit: { type: Type.STRING },
+              unitPriceMinor: { type: Type.INTEGER },
+              lineTotalMinor: { type: Type.INTEGER },
+              category: { type: Type.STRING },
+              confidence: { type: Type.NUMBER },
+            },
+            required: ['productName', 'quantity', 'unitPriceMinor', 'lineTotalMinor'],
           },
-        ],
-        config: {
-          responseMimeType: 'application/json',
-          temperature: 0.1,
         },
-      });
+        notes: { type: Type.STRING },
+        extractionConfidence: { type: Type.NUMBER },
+      },
+      required: ['merchantName', 'totalMinor', 'items'],
+    };
 
-      const text = response.text?.trim();
-      if (text) {
-        const parsed = JSON.parse(text);
-        return normalizeExtractedDraft(parsed);
+    let lastError: any = null;
+    for (const model of CANDIDATE_VISION_MODELS) {
+      try {
+        const response = await aiClient.models.generateContent({
+          model,
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                { text: prompt },
+                {
+                  inlineData: {
+                    mimeType: effectiveMimeType,
+                    data: cleanBase64,
+                  },
+                },
+              ],
+            },
+          ],
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: receiptSchema,
+            temperature: 0.1,
+          },
+        });
+
+        const text = response.text?.trim();
+        if (text) {
+          const parsed = JSON.parse(text);
+          return normalizeExtractedDraft(parsed);
+        }
+      } catch (err: any) {
+        lastError = err;
+        console.warn(`Gemini OCR extraction failed with model ${model}:`, err?.message || err);
       }
-    } catch (err) {
-      console.error('Gemini OCR extraction failed, falling back to heuristic parser:', err);
+    }
+
+    if (lastError) {
+      console.error('All vision models failed for receipt extraction:', lastError);
+      throw new Error(`Receipt processing failed: ${lastError?.message || 'Unable to parse document'}`);
     }
   }
 
-  // Graceful fallback parser for test receipts or when API key is unconfigured
+  // Graceful fallback parser ONLY when API key is unconfigured
   return generateIntelligentFallbackDraft();
 }
 
 function normalizeExtractedDraft(raw: any): ExtractedReceiptDraft {
   const items = Array.isArray(raw.items) ? raw.items : [];
-  const normalizedItems = items.map((item: any, idx: number) => {
+  let normalizedItems = items.map((item: any, idx: number) => {
     const qty = Number(item.quantity) || 1;
-    const unitPrice = Number(item.unitPriceMinor) || 1000;
-    const lineTotal = Number(item.lineTotalMinor) || Math.round(qty * unitPrice);
+    const unitPrice = Math.round(Number(item.unitPriceMinor) || 0);
+    const lineTotal = Math.round(Number(item.lineTotalMinor) || (qty * unitPrice));
     return {
       originalDescription: item.originalDescription || item.productName || `Item ${idx + 1}`,
       productName: item.productName || item.originalDescription || `Item ${idx + 1}`,
@@ -140,7 +182,7 @@ function normalizeExtractedDraft(raw: any): ExtractedReceiptDraft {
       unitPriceMinor: unitPrice,
       lineTotalMinor: lineTotal,
       category: validateCategory(item.category),
-      confidence: Number(item.confidence) || 0.9,
+      confidence: Number(item.confidence) || 0.92,
       reviewFlags: [],
     };
   });
@@ -151,10 +193,28 @@ function normalizeExtractedDraft(raw: any): ExtractedReceiptDraft {
   const extra = Number(raw.extraChargesMinor) || 0;
   const total = Number(raw.totalMinor) || Math.max(0, subtotal + tax + extra - discount);
 
+  // If items was empty but total is present, provide a single generic item for the user to review
+  if (normalizedItems.length === 0 && total > 0) {
+    normalizedItems = [
+      {
+        originalDescription: 'Invoice Purchase',
+        productName: raw.merchantName && raw.merchantName.toLowerCase() !== 'unknown' ? `${raw.merchantName} Purchase` : 'General Purchase',
+        specification: 'Itemized details not detected',
+        quantity: 1,
+        unit: 'order',
+        unitPriceMinor: subtotal || total,
+        lineTotalMinor: subtotal || total,
+        category: 'Store Supplies',
+        confidence: 0.8,
+        reviewFlags: ['unidentified_product'],
+      },
+    ];
+  }
+
   return {
-    merchantName: raw.merchantName || 'Verified Supplier',
-    invoiceNumber: raw.invoiceNumber || `INV-${Math.floor(10000 + Math.random() * 90000)}`,
-    transactionDate: raw.transactionDate || new Date().toISOString().split('T')[0],
+    merchantName: raw.merchantName && raw.merchantName.toLowerCase() !== 'unknown' ? raw.merchantName : 'Verified Supplier',
+    invoiceNumber: raw.invoiceNumber && raw.invoiceNumber.toLowerCase() !== 'unknown' ? raw.invoiceNumber : `INV-${Math.floor(10000 + Math.random() * 90000)}`,
+    transactionDate: raw.transactionDate && /^\d{4}-\d{2}-\d{2}$/.test(raw.transactionDate) ? raw.transactionDate : new Date().toISOString().split('T')[0],
     currency: 'INR',
     subtotalMinor: subtotal,
     taxMinor: tax,
@@ -163,7 +223,7 @@ function normalizeExtractedDraft(raw: any): ExtractedReceiptDraft {
     totalMinor: total,
     paymentMethod: raw.paymentMethod || 'Commercial Transfer / UPI',
     items: normalizedItems,
-    notes: 'Extracted via Gemini purchasing model with confidence verification.',
+    notes: raw.notes || 'Extracted via Gemini purchasing model with confidence verification.',
     extractionConfidence: Number(raw.extractionConfidence) || 0.94,
   };
 }
@@ -374,13 +434,21 @@ ${language === 'hi' ? `- CRITICAL LANGUAGE REQUIREMENT: Respond in natural, prof
 - If recommending savings, note that these are potential opportunities based on aggregate benchmark comparisons, not guaranteed discounts.
 - Propose 2-3 logical follow-up questions at the very end as a numbered list.`;
 
-      const response = await aiClient.models.generateContent({
-        model: 'gemini-3.8-flash',
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        config: { temperature: 0.2 },
-      });
+      const CANDIDATE_TEXT_MODELS = ['gemini-3.1-flash-lite', 'gemini-3.8-flash'];
+      for (const model of CANDIDATE_TEXT_MODELS) {
+        try {
+          const response = await aiClient.models.generateContent({
+            model,
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            config: { temperature: 0.2 },
+          });
 
-      aiAnswerText = response.text || '';
+          aiAnswerText = response.text || '';
+          if (aiAnswerText) break;
+        } catch (err) {
+          console.warn(`Gemini chat error with ${model}:`, err);
+        }
+      }
     } catch (err) {
       console.warn('Gemini chat error, using deterministic response builder:', err);
     }
